@@ -134,6 +134,9 @@ public class Cvrp_ls {
 
     private static Integer[][] read_distances_from_txt(String filename, int dimension) throws IOException {
         Integer[][] distances = new Integer[dimension][dimension];
+        for (int i = 0; i < distances.length; i++) {
+            distances[i][i] = 0;
+        }
         boolean edges = false;
         FileReader file = new FileReader(filename);
         BufferedReader reader = new BufferedReader(file);
@@ -146,7 +149,7 @@ public class Cvrp_ls {
                 break;
             }
         }
-        int row = 0; // Reihe der Spiegelmatrix
+        int row = 1; // Reihe der Spiegelmatrix
         while (edges == true) {
             line = reader.readLine();
             // Ende der Kantenrubrick
@@ -156,8 +159,12 @@ public class Cvrp_ls {
             } else {
                 // Werte der Kantensektion auslesen und Objektivieren
                 String[] txtvalues = line.split(" ");
+                
                 // Einordnung der Textzeile in Matrix
                 for (int i = 0; i < txtvalues.length; i++) {
+                    if(i == row){
+                        continue;
+                    }
                     distances[row][i] = Integer.parseInt(txtvalues[i]); // Diagonale Wertkopie
                     distances[i][row] = Integer.parseInt(txtvalues[i]); // macht Zuordnung leichter später
                 }
