@@ -1,23 +1,38 @@
 package uebung_1;
 
 public class Neighbor {
-    private int id;
+    private Node node;
     private int distance;
-    public int getId() {
-        return id;
+    private int demand = 0;
+
+    public int getDemand() {
+        return demand;
     }
-    public void setId(int id) {
-        this.id = id;
+
+    public void setDemand(int demand) {
+        this.demand = demand;
     }
+
     public int getDistance() {
         return distance;
     }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
     public void setDistance(int distance) {
         this.distance = distance;
     }
-    public Neighbor(int id, int distance) {
-        this.id = id;
+
+    public Neighbor(Node node, int distance, int demand) {
+        this.node = node;
         this.distance = distance;
+        this.demand = demand;
     }
-    
+
 }
