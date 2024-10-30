@@ -13,7 +13,7 @@ public class Cvrp_ls {
         String filename;
         // Pfad zur Datei
         if (args.length == 0) {
-            filename = "B:/OneDrive/Dokumente/Schul-und Studiumprojekte/Studium/Master MLU/Semester 1/Optimierungsalgorithmen schwerer Probleme/Aufgaben/Aufgabe 1/CVRP/src/Loggi-n401-k23.vrp";
+            filename = "src/Loggi-n401-k23.vrp";
         } else {
             filename = args[0];
         }
@@ -34,8 +34,34 @@ public class Cvrp_ls {
             // Koordinatenspeicher
             Integer[][] distances = read_distances_from_txt(filename, dimension);
             ArrayList<Node> nodes = read_nodes_from_txt(reader);
+
+            // TODO: Greedy-Algorithmus implementieren
+
+            // Zuordnung von Knoten und Distanzen
+            // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
+            // TODO: Knotenzuordnung implementieren
+            /** row + 1 = untere Knoten-ID (zählt ab 1 nicht ab 0)
+             *  col + 1 = obere Knoten-ID
+             *  row/col     = Distanz von unterer zu oberer Knoten-ID 
+             */
+            for (int row = 0; row < distances.length-1; row++) {
+                for (int col = 0; col < distances[row].length-1; col++) {
+                    Node lower = nodes.get(col+1);    //Knoten der unteren Matrixhälfte
+                    Node upper = nodes.get(row+1);     //Knoten der oberen  Matrixhälfte
+                
+                    lower.addNeighbor(new Neighbor(upper.getId(),
+                                                   distances[row][col]));
+                    upper.addNeighbor(new Neighbor(lower.getId(),
+                                                   distances[row][col]));
+                    
+                }
+            }
+            /**
+             * Testausgaben erste 5 Zeilen/Knoten
+             */
             StringBuilder output_diagonal = new StringBuilder();
             StringBuilder output_nodes = new StringBuilder();
+            StringBuilder output_final = new StringBuilder();
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 5; j++) {
                     output_diagonal.append(distances[i][j]).append("\t");
@@ -45,24 +71,25 @@ public class Cvrp_ls {
                             .append("X = ").append(nodes.get(i).getCoordX()).append("\t")
                             .append("Y = ").append(nodes.get(i).getCoordY()).append("\n");
                 output_diagonal.append("\n");
-
+            }
+            /**
+             * Testausgabe erste 5 Knotenzuordnungen
+             */
+            for (int i = 0; i < 5; i++) {
+               ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
+               for (int j = 0; j < neighbors.size(); j++) {
+                if(j < 5){
+                    output_final.append("Knoten " + nodes.get(i).getId()).append("\n");
+                    output_final.append("Nachbar ID:"+neighbors.get(j).getId()+"\t");
+                    output_final.append("Distanz: " +  neighbors.get(j).getDistance()+"\n");
+                }
+               }
+                
             }
             System.out.println(output_diagonal.toString() + "\n\n");
             System.out.println(output_nodes.toString());
-
-            // TODO: Greedy-Algorithmus implementieren
-
-            // Zuordnung von Knoten und Distanzen
-            // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
-            // TODO: Knotenzuordnung implementieren
-            for (int row = 1; row < dimension; row++) {
-                for (int col = 0; col < distances[row].length; col++) {
-                    // Node current = Node.get(row)
-                    // Nodes.get(row).add(new Node(row-1,
-                    // Nodes.get(row-1), )
-                }
-
-            }
+            System.out.println(output_final.toString());
+    
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -131,7 +158,7 @@ public class Cvrp_ls {
                 String[] txtvalues = line.split(" ");
                 // Einordnung der Textzeile in Matrix
                 for (int i = 0; i < txtvalues.length; i++) {
-                    distances[row][i] = Integer.parseInt(txtvalues[i]); // Diagonale Werteingabe
+                    distances[row][i] = Integer.parseInt(txtvalues[i]); // Diagonale Wertkopie
                     distances[i][row] = Integer.parseInt(txtvalues[i]); // macht Zuordnung leichter später
                 }
             }
