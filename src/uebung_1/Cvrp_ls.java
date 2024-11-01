@@ -246,6 +246,7 @@ public class Cvrp_ls {
                 currentRoute.addCost(next.getNode().getDistance()); //straight zurück zum Depot
                 routes.add(currentRoute);                           // Route abspeichern
                 currentRoute = new Route(capacity);
+                // TODO: Textausgabe der besuchten Knoten
             }
 
         }
