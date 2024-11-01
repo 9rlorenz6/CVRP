@@ -103,6 +103,7 @@ public class Cvrp_ls {
             if (nodes.get(i).getDemand() > 0) {
                 result = false;
                 nodes.remove(i);    // Node[i=1] = Node(2) = Node mit ID = 3!!
+                // TODO: Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
             }
         }
         return result;
