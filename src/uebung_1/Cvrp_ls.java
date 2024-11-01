@@ -7,10 +7,8 @@ import java.util.ArrayList;
 
 public class Cvrp_ls {
 
-    
-
     public static void main(String[] args) {
-         String filename;
+        String filename;
         // Pfad zur Datei
         if (args.length == 0) {
             filename = "src/Loggi-n401-k23.vrp";
@@ -28,8 +26,7 @@ public class Cvrp_ls {
                 // Beginne mit dem Lesen der Koordinaten
                 if (line.contains("DIMENSION")) {
                     dimension = Integer.parseInt(line.split(": ")[1]);
-                }
-                else if(line.contains("CAPACITY")){
+                } else if (line.contains("CAPACITY")) {
                     capacity = Integer.parseInt(line.split(": ")[1]);
                 }
             }
@@ -42,27 +39,29 @@ public class Cvrp_ls {
 
             // Zuordnung von Knoten und Distanzen
             // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
-            /** row + 1 = untere Knoten-ID (zählt ab 1 nicht ab 0)
-             *  col + 1 = obere Knoten-ID
-             *  row/col     = Distanz von unterer zu oberer Knoten-ID 
+            /**
+             * row + 1 = untere Knoten-ID (zählt ab 1 nicht ab 0)
+             * col + 1 = obere Knoten-ID
+             * row/col = Distanz von unterer zu oberer Knoten-ID
              */
             for (int row = 0; row < distances.length; row++) {
-                Node current = nodes.get(row);    //Knoten der aktuellen Zeile
+                Node current = nodes.get(row); // Knoten der aktuellen Zeile
                 for (int col = 0; col < distances[row].length; col++) {
-                    if (col == row) {   //Selbstdistanzen überspringen
+                    if (col == row) { // Selbstdistanzen überspringen
                         continue;
                     }
-                    current.addNeighbor(new Neighbor(nodes.get(col), //Knoten-ID des Nachbarn
-                                                     distances[row][col],// Distanz zu ihm
-                                                     demands[row][1])); //Bedarf ([0=NodeID][1=Demand-Menge])
+                    current.addNeighbor(new Neighbor(nodes.get(col), // Knoten-ID des Nachbarn
+                            distances[row][col], // Distanz zu ihm
+                            demands[row][1])); // Bedarf ([0=NodeID][1=Demand-Menge])
                 }
-                
             }
             /**
              * Testausgaben erste 5 Zeilen/Knoten
-            * Falls du dir eine Übersicht schaffen willst
-            * der Algorithmus arbeitet nur mit "nodes", die anderen Strukturen waren fürs Aufbauen
-           */ StringBuilder output_diagonal = new StringBuilder();
+             * Falls du dir eine Übersicht schaffen willst
+             * der Algorithmus arbeitet nur mit "nodes", die anderen Strukturen waren fürs
+             * Aufbauen
+             */
+            StringBuilder output_diagonal = new StringBuilder();
             StringBuilder output_nodes = new StringBuilder();
             StringBuilder output_final = new StringBuilder();
             for (int i = 0; i < 5; i++) {
@@ -71,41 +70,44 @@ public class Cvrp_ls {
 
                 }
                 output_nodes.append("ID: ").append(nodes.get(i).getId()).append("\t")
-                            .append("X = ").append(nodes.get(i).getCoordX()).append("\t")
-                            .append("Y = ").append(nodes.get(i).getCoordY()).append("\n");
+                        .append("X = ").append(nodes.get(i).getCoordX()).append("\t")
+                        .append("Y = ").append(nodes.get(i).getCoordY()).append("\n");
                 output_diagonal.append("\n");
             }
-           
+
             for (int i = 0; i < 5; i++) {
-               ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
-               for (int j = 0; j < neighbors.size(); j++) {
-                if(j < 5){
-                    output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
-                    output_final.append("Nachbar ID: "+neighbors.get(j).getNode().getId()+"\t");
-                    output_final.append("Distanz: " +  neighbors.get(j).getDistance()+"\t");
-                    output_final.append("eigener Bedarf: " +  neighbors.get(j).getDemand()+"\n");
+                ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
+                for (int j = 0; j < neighbors.size(); j++) {
+                    if (j < 5) {
+                        output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
+                        output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() + "\t");
+                        output_final.append("Distanz: " + neighbors.get(j).getDistance() + "\t");
+                        output_final.append("eigener Bedarf: " + neighbors.get(j).getDemand() + "\n");
+                    }
                 }
-               }
-                
+
             }
             System.out.println(output_diagonal.toString() + "\n\n");
             System.out.println(output_nodes.toString());
             System.out.println(output_final.toString());
-      ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-    //  System.out.println(routes);
+            ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
+            // System.out.println(routes);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private static boolean allDemandsFulfilled(ArrayList<Node> nodes){
+        //TODO: Liste um leere Knoten leeren 
+    private static boolean allDemandsFulfilled(ArrayList<Node> nodes) {
         boolean result = true;
-        for (int i = 1; i < nodes.size(); i++) {    //i = 1, Depot ist 0 -> Demand = 0
-            if(nodes.get(i).getDemand() > 0){
+        for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist 0 -> Demand = 0
+            if (nodes.get(i).getDemand() > 0) {
                 result = false;
+                nodes.remove(i);    // Node[i=1] = Node(2) = Node mit ID = 3!!
             }
         }
         return result;
     }
+
     private static ArrayList<Node> read_nodes_from_txt(String filename) throws IOException {
         FileReader file = new FileReader(filename);
         BufferedReader reader = new BufferedReader(file);
@@ -145,6 +147,7 @@ public class Cvrp_ls {
         reader.close();
         return nodes;
     }
+
     private static Integer[][] read_distances_from_txt(String filename, int dimension) throws IOException {
         Integer[][] distances = new Integer[dimension][dimension];
         for (int i = 0; i < distances.length; i++) {
@@ -172,10 +175,10 @@ public class Cvrp_ls {
             } else {
                 // Werte der Kantensektion auslesen und Objektivieren
                 String[] txtvalues = line.split(" ");
-                
+
                 // Einordnung der Textzeile in Matrix
                 for (int i = 0; i < txtvalues.length; i++) {
-                    if(i == row){
+                    if (i == row) {
                         continue;
                     }
                     distances[row][i] = Integer.parseInt(txtvalues[i]); // Diagonale Wertkopie
@@ -187,13 +190,14 @@ public class Cvrp_ls {
         reader.close();
         return distances;
     }
-    private static Integer[][] read_demands_from_txt(String filename, int dimension) throws IOException{
+
+    private static Integer[][] read_demands_from_txt(String filename, int dimension) throws IOException {
         FileReader file = new FileReader(filename);
         BufferedReader reader = new BufferedReader(file);
         Integer[][] demandlist = new Integer[dimension][2];
-        boolean  readingDemand = false;
+        boolean readingDemand = false;
         int nodeId = 0; // Für Array-Platzlesung
-        int demandSlot = 1; //Für Array-Platzlesung
+        int demandSlot = 1; // Für Array-Platzlesung
 
         String line = "";
         while ((line = reader.readLine()) != null) {
@@ -226,17 +230,25 @@ public class Cvrp_ls {
         reader.close();
         return demandlist;
     }
-    public static ArrayList<Route> find_Greedy_Set(ArrayList<Node> nodes, int capacity){
+
+    public static ArrayList<Route> find_Greedy_Set(ArrayList<Node> nodes, int capacity) {
         ArrayList<Route> routes = new ArrayList<Route>();
         Route currentRoute = new Route(capacity);
-        Node current = nodes.get(0);        //Startpunkt bei Depot
-            while(currentRoute.getCapacity() > 0){
-                Neighbor next = current.getClosestDemandingNeighbor();
-                currentRoute.addCost(next.getDistance());
-                int nodeDemand = next.getDemand();
-                next.getNode().reduceDemand(currentRoute.getCapacity());
-                currentRoute.reduceCapacity(nodeDemand);
-                  }
+        Node current = nodes.get(0); // Startpunkt bei Depot
+        while (currentRoute.getCapacity() > 0) {
+            Neighbor next = current.getClosestDemandingNeighbor();
+            currentRoute.addCost(next.getDistance());
+            int nodeDemand = next.getDemand();
+            next.getNode().reduceDemand(currentRoute.getCapacity());
+            currentRoute.reduceCapacity(nodeDemand);
+
+            if (currentRoute.getCapacity() == 0) {
+                currentRoute.addCost(next.getNode().getDistance()); //straight zurück zum Depot
+                routes.add(currentRoute);                           // Route abspeichern
+                currentRoute = new Route(capacity);
+            }
+
+        }
         return routes;
     }
 }
