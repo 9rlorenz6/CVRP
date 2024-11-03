@@ -8,6 +8,10 @@ public class Node implements Comparator<Node> {
     private int id;
     private int demand = 0;
 
+    public void setDemand(int demand) {
+        this.demand = demand;
+    }
+
     public int getDemand() {
         return demand;
     }
