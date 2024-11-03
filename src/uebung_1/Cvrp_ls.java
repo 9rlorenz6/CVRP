@@ -35,7 +35,6 @@ public class Cvrp_ls {
             Integer[][] distances = read_distances_from_txt(filename, dimension);
             ArrayList<Node> nodes = read_nodes_from_txt(filename);
             Integer[][] demands = read_demands_from_txt(filename, dimension);
-            // TODO: Greedy-Algorithmus implementieren
 
             // Zuordnung von Knoten und Distanzen
             // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
@@ -96,7 +95,6 @@ public class Cvrp_ls {
             e.printStackTrace();
         }
     }
-        //TODO: Liste um leere Knoten leeren 
     private static boolean allDemandsFulfilled(ArrayList<Node> nodes) {
         boolean result = true;
         for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist 0 -> Demand = 0
