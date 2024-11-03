@@ -49,9 +49,10 @@ public class Cvrp_ls {
                     if (col == row) { // Selbstdistanzen überspringen
                         continue;
                     }
+                    current.setDemand(demands[row][1]);
                     current.addNeighbor(new Neighbor(nodes.get(col), // Knoten-ID des Nachbarn
-                            distances[row][col], // Distanz zu ihm
-                            demands[row][1])); // Bedarf ([0=NodeID][1=Demand-Menge])
+                                                     distances[row][col])); // Distanz zu ihm
+                                                    // Bedarf ([0=NodeID][1=Demand-Menge])
                 }
             }
             /**
@@ -81,7 +82,7 @@ public class Cvrp_ls {
                         output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
                         output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() + "\t");
                         output_final.append("Distanz: " + neighbors.get(j).getDistance() + "\t");
-                        output_final.append("eigener Bedarf: " + neighbors.get(j).getDemand() + "\n");
+                        output_final.append("Bedarf Knoten " + neighbors.get(j).getNode().getId() + ":  " + neighbors.get(j).getNode().getDemand() + "\n");
                     }
                 }
 
@@ -244,10 +245,7 @@ public class Cvrp_ls {
             System.out.println(next);
             System.out.println(current.getId());
             currentRoute.addCost(next.getDistance());
-            //System.out.println(currentRoute.getCost());
-            //int nodeDemand = next.getDemand(node);
-            int nodeDemand = next.getDemand();
-            System.out.println(nodeDemand);
+            int nodeDemand = next.getNode().getDemand();
             next.getNode().reduceDemand(currentRoute.getCapacity());
             currentRoute.reduceCapacity(nodeDemand);
 

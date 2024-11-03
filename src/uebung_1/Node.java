@@ -8,6 +8,10 @@ public class Node implements Comparator<Node> {
     private int id;
     private int demand = 0;
 
+    public void setDemand(int demand) {
+        this.demand = demand;
+    }
+
     public int getDemand() {
         return demand;
     }
@@ -57,7 +61,7 @@ public class Node implements Comparator<Node> {
         int i = 0;
         int bestIndex = neighbors.get(0).getNode().getId(); // Start mit erstem Nachbar
         while (i < neighbors.size()) {
-            int nDemand = neighbors.get(i).getDemand();
+            int nDemand = neighbors.get(i).getNode().getDemand();
             if (nDemand == 0) { // voll versorgte Nachbarn überspringen
                 i++;
                 continue;
