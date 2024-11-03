@@ -63,12 +63,12 @@ public class Node implements Comparator<Node> {
         while (i < neighbors.size()) {
             int nDemand = neighbors.get(i).getNode().getDemand();
             if (nDemand == 0) { // voll versorgte Nachbarn überspringen
-                i++;
                 continue;
             } else if (nDemand > biggestDemand) {
                 bestIndex = i; // Nachbar mit meistem Bedarf merken
                 biggestDemand = nDemand; // neuer Vergleichspunkt
             }
+            i++;
         }
         return neighbors.get(bestIndex);
 

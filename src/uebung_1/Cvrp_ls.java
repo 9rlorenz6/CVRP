@@ -87,11 +87,11 @@ public class Cvrp_ls {
                 }
 
             }
-            System.out.println(output_diagonal.toString() + "\n\n");
-            System.out.println(output_nodes.toString());
-            System.out.println(output_final.toString());
+            // System.out.println(output_diagonal.toString() + "\n\n");
+            // System.out.println(output_nodes.toString());
+            // System.out.println(output_final.toString());
             ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-            // System.out.println(routes);
+            System.out.println(routes);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -263,7 +263,7 @@ public class Cvrp_ls {
                 
                 output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
                 output_final.append("\t" + "Distanz: " + next.getDistance() + "\t");
-                output_final.append("\t" + "verbleibender Bedaprf: " + next.getDemand() + "\n");
+                output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\n");
                 System.out.println(output_final.toString());
                 route_Counter++;
                         
