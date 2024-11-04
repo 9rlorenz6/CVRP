@@ -7,6 +7,9 @@ public class Node implements Comparator<Node> {
     private ArrayList<Neighbor> neighbors = new ArrayList<Neighbor>();
     private int id;
     private int demand = 0;
+    private int coordX;
+    private int coordY;
+    private Node nextNode;
 
     public void setDemand(int demand) {
         this.demand = demand;
@@ -22,21 +25,8 @@ public class Node implements Comparator<Node> {
         } else {
             this.demand -= demand;
         }
-
     }
-
-    private int coordX;
-    private int coordY;
-    private int distance;
-
-    public int getDistance() {
-        return distance;
-    }
-
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
+    
     public int getId() {
         return id;
     }
@@ -57,21 +47,22 @@ public class Node implements Comparator<Node> {
     }
 
     public Neighbor getClosestDemandingNeighbor() {
-        int biggestDemand = 0;
-        int i = 0;
-        int bestIndex = neighbors.get(0).getNode().getId(); // Start mit erstem Nachbar
+        int bestIndex = 0;
+        int shortestDistance = neighbors.get(0).getDistance(); // Start mit erstem Nachbar
+        int i = 1;
+        Neighbor nextNode = neighbors.get(i);
         while (i < neighbors.size()) {
-            int nDemand = neighbors.get(i).getNode().getDemand();
-            if (nDemand == 0) { // voll versorgte Nachbarn überspringen
+            if (neighbors.get(i).getNode().getDemand() == 0) { // voll versorgte Nachbarn überspringen
+                i++;
                 continue;
-            } else if (nDemand > biggestDemand) {
+            }
+            if (nextNode.getDistance() < shortestDistance) {
                 bestIndex = i; // Nachbar mit meistem Bedarf merken
-                biggestDemand = nDemand; // neuer Vergleichspunkt
+                shortestDistance = nextNode.getDistance(); // neuer Vergleichspunkt
             }
             i++;
         }
         return neighbors.get(bestIndex);
-
     }
 
     public ArrayList<Neighbor> getNeighbors() {

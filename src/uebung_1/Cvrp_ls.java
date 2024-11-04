@@ -51,8 +51,8 @@ public class Cvrp_ls {
                     }
                     current.setDemand(demands[row][1]);
                     current.addNeighbor(new Neighbor(nodes.get(col), // Knoten-ID des Nachbarn
-                                                     distances[row][col])); // Distanz zu ihm
-                                                    // Bedarf ([0=NodeID][1=Demand-Menge])
+                            distances[row][col])); // Distanz zu ihm
+                    // Bedarf ([0=NodeID][1=Demand-Menge])
                 }
             }
             /**
@@ -77,12 +77,13 @@ public class Cvrp_ls {
 
             for (int i = 0; i < 5; i++) {
                 ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
-                for (int j = 0; j < neighbors.size(); j++) {
+                for (int j = 10; j < neighbors.size(); j++) {
                     if (j < 5) {
                         output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
                         output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() + "\t");
                         output_final.append("Distanz: " + neighbors.get(j).getDistance() + "\t");
-                        output_final.append("Bedarf Knoten " + neighbors.get(j).getNode().getId() + ":  " + neighbors.get(j).getNode().getDemand() + "\n");
+                        output_final.append("Bedarf Knoten " + neighbors.get(j).getNode().getId() + ":  "
+                                + neighbors.get(j).getNode().getDemand() + "\n");
                     }
                 }
 
@@ -91,24 +92,23 @@ public class Cvrp_ls {
             System.out.println(output_nodes.toString());
             System.out.println(output_final.toString());
             ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-            // System.out.println(routes);
+            System.out.println(routes);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private static boolean allDemandsFulfilled(ArrayList<Node> nodes) {
-        boolean result = true;
-        for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist 0 -> Demand = 0
+
+    private static ArrayList<Node> allDemandsFulfilled(ArrayList<Node> nodes) {
+        for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist bei 0 -> Demand = 0
             if (nodes.get(i).getDemand() > 0) {
-                result = false;
-                //nodes.remove(i);    // Node[i=1] = Node(2) = Node mit ID = 3!!
+                // nodes.remove(i); // Node[i=1] = Node(2) = Node mit ID = 3!!
                 // TODO: Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
+                continue;
             } else {
-                nodes.remove(i); 
-                result = true;
+                nodes.remove(i);
             }
         }
-        return result;
+        return nodes;
     }
 
     private static ArrayList<Node> read_nodes_from_txt(String filename) throws IOException {
@@ -236,41 +236,62 @@ public class Cvrp_ls {
 
     public static ArrayList<Route> find_Greedy_Set(ArrayList<Node> nodes, int capacity) {
         ArrayList<Route> routes = new ArrayList<Route>();
-        int route_Counter = 0;
+        int route_Counter = 1;
         Route currentRoute = new Route(capacity);
-        Node current = nodes.get(0); // Startpunkt bei Depot
-        StringBuilder output_final = new StringBuilder();
-        ArrayList<Neighbor> neighbors = nodes.get(0).getNeighbors();
+        Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
+        ArrayList<Neighbor> neighbors = current.getNeighbors();
         System.out.println("Depot");
         while (currentRoute.getCapacity() > 0) {
+            StringBuilder output_final = new StringBuilder();
             Neighbor next = current.getClosestDemandingNeighbor();
-            currentRoute.addCost(next.getDistance());
+
+            // Abarbeitung
             int nodeDemand = next.getNode().getDemand();
+            currentRoute.addCost(next.getDistance());
             next.getNode().reduceDemand(currentRoute.getCapacity());
             currentRoute.reduceCapacity(nodeDemand);
-            output_final.append("aktuelle Route Nr. " + route_Counter+1 + "\n");
-            //if (allDemandsFulfilled(next.getNode())) {
-            if (currentRoute.getCapacity() <= 100) {
-                currentRoute.addCost(next.getNode().getDistance()); //straight zurück zum Depot
-                routes.add(currentRoute);                           // Route abspeichern
-                // TODO: Textausgabe der besuchten Knoten 
-                
-                output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
-                output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
-                output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t" + "verbleibende Kapazität " + currentRoute.getCapacity());
-                System.out.println(output_final.toString());
-                route_Counter++;
-                //System.out.println("verbleibende Knoten: " + routes.);   
-            } else {
-                //current = nodes.get(0); // wieder bei Depot starten
-                if (allDemandsFulfilled(nodes) == true) {
-                    //System.out.println("leere Knoten entfernt");
+
+            // Ausstiegsklauseln
+            if ((currentRoute.getCapacity() == 0)
+                    || (nodes.size() == 1)) {
+                currentRoute.addCost(next.getDistance()); // straight zurück zum Depot
+                routes.add(currentRoute); // Route abspeichern
+                if (nodes.size() > 1) {
+                    currentRoute = new Route(capacity); // neue Route erstellen
+                    route_Counter++;
+                } else {
+                    return routes;
                 }
             }
-            current = nodes.get(next.getNode().getId());
-            System.out.println(current.getId());
-            currentRoute = new Route(capacity);
+            if (next.getNode().getDemand() == 0) {
+                removeNodeById(nodes, next.getNode().getId());
+            }
+            output_final.append("aktuelle Route Nr. " + route_Counter + "\n");
+            output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
+            output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
+            output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
+                    + "verbleibende Kapazität " + currentRoute.getCapacity());
+            // TODO: Textausgabe der besuchten Knoten
+            System.out.println(output_final.toString());
         }
         return routes;
+    }
+
+    public static Node getNodeById(ArrayList<Node> nodes, int id) {
+        Node node = null;
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes.get(i).getId() == id) {
+                return node = nodes.get(i);
+            }
+        }
+        return node;
+    }
+
+    public static void removeNodeById(ArrayList<Node> nodes, int id) {
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes.get(i).getId() == id) {
+                nodes.remove(i);
+            }
+        }
     }
 }

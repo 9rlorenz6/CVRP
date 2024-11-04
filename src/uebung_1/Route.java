@@ -9,7 +9,10 @@ public class Route {
     public int getCost() {
         return cost;
     }
-
+    public String toString(){
+        String result = "Gesamtdistanz " + cost + "\n";
+        return result;
+    }
     public void addCost(int cost) {
         this.cost += cost;
     }
