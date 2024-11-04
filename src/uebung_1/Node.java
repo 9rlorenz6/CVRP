@@ -9,8 +9,16 @@ public class Node implements Comparator<Node> {
     private int demand = 0;
     private int coordX;
     private int coordY;
-    private Node nextNode;
 
+    public Neighbor getNeighborById(int id){
+        Neighbor n = null;
+        for (int i = 0; i < neighbors.size(); i++) {
+            if(neighbors.get(i).getNode().getId() == id){
+                n = neighbors.get(i);
+            }
+        }
+        return n;
+    }
     public void setDemand(int demand) {
         this.demand = demand;
     }
@@ -26,7 +34,7 @@ public class Node implements Comparator<Node> {
             this.demand -= demand;
         }
     }
-    
+
     public int getId() {
         return id;
     }
@@ -50,8 +58,11 @@ public class Node implements Comparator<Node> {
         int bestIndex = 0;
         int shortestDistance = neighbors.get(0).getDistance(); // Start mit erstem Nachbar
         int i = 1;
-        Neighbor nextNode = neighbors.get(i);
+        if (neighbors.size() == 0){
+            return null;
+        }
         while (i < neighbors.size()) {
+            Neighbor nextNode = neighbors.get(i);
             if (neighbors.get(i).getNode().getDemand() == 0) { // voll versorgte Nachbarn überspringen
                 i++;
                 continue;

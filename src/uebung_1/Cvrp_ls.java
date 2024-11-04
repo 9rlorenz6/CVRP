@@ -77,7 +77,7 @@ public class Cvrp_ls {
 
             for (int i = 0; i < 5; i++) {
                 ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
-                for (int j = 10; j < neighbors.size(); j++) {
+                for (int j = 0; j < neighbors.size(); j++) {
                     if (j < 5) {
                         output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
                         output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() + "\t");
@@ -240,22 +240,29 @@ public class Cvrp_ls {
         Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
         ArrayList<Neighbor> neighbors = current.getNeighbors();
-        System.out.println("Depot");
-        while (currentRoute.getCapacity() > 0) {
+        System.out.println("Depot\naktuelle Route Nr. 1");
+        while (nodes.size() > 1) {
+
             StringBuilder output_final = new StringBuilder();
             Neighbor next = current.getClosestDemandingNeighbor();
-
+            
             // Abarbeitung
             int nodeDemand = next.getNode().getDemand();
             currentRoute.addCost(next.getDistance());
             next.getNode().reduceDemand(currentRoute.getCapacity());
             currentRoute.reduceCapacity(nodeDemand);
-
+            
+            output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
+            output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
+            output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
+                    + "verbleibende Kapazität " + currentRoute.getCapacity());
+                    
             // Ausstiegsklauseln
             if ((currentRoute.getCapacity() == 0)
-                    || (nodes.size() == 1)) {
-                currentRoute.addCost(next.getDistance()); // straight zurück zum Depot
+                    || (nodes.size() == 1)) {            // straight zurück zum Depot
+                        currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
                 routes.add(currentRoute); // Route abspeichern
+                output_final.append("\n\naktuelle Route Nr. " + route_Counter);
                 if (nodes.size() > 1) {
                     currentRoute = new Route(capacity); // neue Route erstellen
                     route_Counter++;
@@ -266,13 +273,9 @@ public class Cvrp_ls {
             if (next.getNode().getDemand() == 0) {
                 removeNodeById(nodes, next.getNode().getId());
             }
-            output_final.append("aktuelle Route Nr. " + route_Counter + "\n");
-            output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
-            output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
-            output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
-                    + "verbleibende Kapazität " + currentRoute.getCapacity());
             // TODO: Textausgabe der besuchten Knoten
             System.out.println(output_final.toString());
+            current = next.getNode();
         }
         return routes;
     }
