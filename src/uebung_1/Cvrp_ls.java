@@ -11,7 +11,7 @@ public class Cvrp_ls {
         String filename;
         // Pfad zur Datei
         if (args.length == 0) {
-            filename = "src/Testdaten_Loggi.vrp";
+            filename = "src/Loggi-n401-k23.vrp";
         } else {
             filename = args[0];
         }
@@ -242,9 +242,8 @@ public class Cvrp_ls {
         int demandCounter = 1; // 1 bis (Anzahl Knoten)
         Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
-        ArrayList<Neighbor> neighbors = current.getNeighbors();
         System.out.println("Depot\naktuelle Route Nr. 1");
-        while (demandCounter < nodes.size()) {
+        while (current.getClosestDemandingNeighbor() != null) {
             StringBuilder output_final = new StringBuilder();
             //den nächsten Nachbarn suchen
             Neighbor next = current.getClosestDemandingNeighbor();
@@ -269,7 +268,9 @@ public class Cvrp_ls {
                 routes.add(currentRoute); // Route abspeichern
                 currentRoute = new Route(capacity); // neue Route erstellen
                 route_Counter++;    //Zähler
-                current = nodes.get(0);//Nächste Suche von Depot aus, da neue Route 
+                current = nodes.get(0);//Nächste Suche von Depot aus, da neue Route
+                output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t");
+                output_final.append("\naktuelle Route Nr. " + route_Counter);
             }
             // Route kann noch weiter gehen, da Kapazität noch nicht erschöpft
             // Belieferungszähler um 1 erhöhen
@@ -278,10 +279,12 @@ public class Cvrp_ls {
                 demandCounter++;
             }
 
-            output_final.append("\n\naktuelle Route Nr. " + route_Counter);
+            
             // TODO: Textausgabe der besuchten Knoten
             System.out.println(output_final.toString());
         }
+        // letzte Route mit Restkapazität darf nicht fehlen
+        routes.add(currentRoute);
         return routes;
     }
 
