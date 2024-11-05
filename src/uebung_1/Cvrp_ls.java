@@ -92,7 +92,9 @@ public class Cvrp_ls {
             System.out.println(output_nodes.toString());
             System.out.println(output_final.toString());
             ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-            System.out.println(routes);
+            for (Route route : routes) {
+                System.out.println(route);   
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -237,46 +239,52 @@ public class Cvrp_ls {
     public static ArrayList<Route> find_Greedy_Set(ArrayList<Node> nodes, int capacity) {
         ArrayList<Route> routes = new ArrayList<Route>();
         int route_Counter = 1;
+        int demandCounter = 1; // 1 bis (Anzahl Knoten)
         Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
-        ArrayList<Neighbor> neighbors = current.getNeighbors();
         System.out.println("Depot\naktuelle Route Nr. 1");
-        while (nodes.size() > 1) {
-
+        while (current.getClosestDemandingNeighbor() != null) {
             StringBuilder output_final = new StringBuilder();
+            //den nächsten Nachbarn suchen
             Neighbor next = current.getClosestDemandingNeighbor();
-            
-            // Abarbeitung
+
+            // Abarbeitung der Bedarfe und Kosten
             int nodeDemand = next.getNode().getDemand();
             currentRoute.addCost(next.getDistance());
             next.getNode().reduceDemand(currentRoute.getCapacity());
             currentRoute.reduceCapacity(nodeDemand);
             
+
+            //Verfolgungsausgabe
             output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
             output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
             output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
                     + "verbleibende Kapazität " + currentRoute.getCapacity());
-                    
-            // Ausstiegsklauseln
-            if ((currentRoute.getCapacity() == 0)
-                    || (nodes.size() == 1)) {            // straight zurück zum Depot
-                        currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
+
+            // Route ist beendet, Wege zurück zu Depot und neue Route starten
+            if (currentRoute.getCapacity() == 0) {  
+                  // straight zurück zum Depot        
+                currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
                 routes.add(currentRoute); // Route abspeichern
-                output_final.append("\n\naktuelle Route Nr. " + route_Counter);
-                if (nodes.size() > 1) {
-                    currentRoute = new Route(capacity); // neue Route erstellen
-                    route_Counter++;
-                } else {
-                    return routes;
-                }
+                currentRoute = new Route(capacity); // neue Route erstellen
+                route_Counter++;    //Zähler
+                current = nodes.get(0);//Nächste Suche von Depot aus, da neue Route
+                output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t");
+                output_final.append("\naktuelle Route Nr. " + route_Counter);
             }
-            if (next.getNode().getDemand() == 0) {
-                removeNodeById(nodes, next.getNode().getId());
+            // Route kann noch weiter gehen, da Kapazität noch nicht erschöpft
+            // Belieferungszähler um 1 erhöhen
+            else{
+                current = next.getNode();
+                demandCounter++;
             }
+
+            
             // TODO: Textausgabe der besuchten Knoten
             System.out.println(output_final.toString());
-            current = next.getNode();
         }
+        // letzte Route mit Restkapazität darf nicht fehlen
+        routes.add(currentRoute);
         return routes;
     }
 
@@ -288,13 +296,5 @@ public class Cvrp_ls {
             }
         }
         return node;
-    }
-
-    public static void removeNodeById(ArrayList<Node> nodes, int id) {
-        for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).getId() == id) {
-                nodes.remove(i);
-            }
-        }
     }
 }

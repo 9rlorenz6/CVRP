@@ -10,15 +10,17 @@ public class Node implements Comparator<Node> {
     private int coordX;
     private int coordY;
 
-    public Neighbor getNeighborById(int id){
+    public Neighbor getNeighborById(int id) {
         Neighbor n = null;
         for (int i = 0; i < neighbors.size(); i++) {
-            if(neighbors.get(i).getNode().getId() == id){
+            if (neighbors.get(i).getNode().getId() == id) {
                 n = neighbors.get(i);
+                break;
             }
         }
         return n;
     }
+
     public void setDemand(int demand) {
         this.demand = demand;
     }
@@ -34,7 +36,7 @@ public class Node implements Comparator<Node> {
             this.demand -= demand;
         }
     }
-
+    
     public int getId() {
         return id;
     }
@@ -55,25 +57,27 @@ public class Node implements Comparator<Node> {
     }
 
     public Neighbor getClosestDemandingNeighbor() {
-        int bestIndex = 0;
-        int shortestDistance = neighbors.get(0).getDistance(); // Start mit erstem Nachbar
-        int i = 1;
-        if (neighbors.size() == 0){
+        int i = 0;  //Depot ist 1, daher bei 2 anfangen
+        Neighbor closestNeighbor = null;
+        if (neighbors.size() == 0) {
             return null;
         }
         while (i < neighbors.size()) {
-            Neighbor nextNode = neighbors.get(i);
-            if (neighbors.get(i).getNode().getDemand() == 0) { // voll versorgte Nachbarn überspringen
-                i++;
-                continue;
-            }
-            if (nextNode.getDistance() < shortestDistance) {
-                bestIndex = i; // Nachbar mit meistem Bedarf merken
-                shortestDistance = nextNode.getDistance(); // neuer Vergleichspunkt
+           Neighbor nextNeighbor = neighbors.get(i);
+            if (nextNeighbor.getNode().getDemand() != 0) { // voll versorgte Nachbarn überspringen
+                if (closestNeighbor == null
+                ||  nextNeighbor.getDistance() < closestNeighbor.getDistance()) {
+                    //Erster Knoten mit Bedarf wird Vergleichsknoten
+                   closestNeighbor = nextNeighbor;
+                }
             }
             i++;
         }
-        return neighbors.get(bestIndex);
+        if (closestNeighbor == null ){
+            //Sicherheitshalber; Rückkehr zu Depot, keine Nachbarn übrig
+            closestNeighbor = this.getNeighborById(1);
+        }
+        return closestNeighbor;
     }
 
     public ArrayList<Neighbor> getNeighbors() {
