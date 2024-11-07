@@ -106,7 +106,7 @@ public class Cvrp_ls {
             System.out.println(output_diagonal.toString() + "\n\n");
             System.out.println(output_nodes.toString());
             System.out.println(output_final.toString());
-            if (algorithm.equals("taboo")) {       //Auswahl des Algorithmus
+            if (algorithm.equals("taboo")) {       //Auswahl des Algorithmus TODO: Switch einbauen für Genetisch
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000,maxRuntimeMillis);
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
@@ -164,7 +164,7 @@ public class Cvrp_ls {
                         values[coordx],
                         values[coordy]));
             }
-        }
+        } 
         reader.close();
         return nodes;
     }
