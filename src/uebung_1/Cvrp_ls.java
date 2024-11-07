@@ -75,7 +75,7 @@ public class Cvrp_ls {
              * Falls du dir eine Übersicht schaffen willst
              * der Algorithmus arbeitet nur mit "nodes", die anderen Strukturen waren fürs
              * Aufbauen
-             */
+             
             StringBuilder output_diagonal = new StringBuilder();
             StringBuilder output_nodes = new StringBuilder();
             StringBuilder output_final = new StringBuilder();
@@ -105,11 +105,12 @@ public class Cvrp_ls {
             }
             System.out.println(output_diagonal.toString() + "\n\n");
             System.out.println(output_nodes.toString());
-            System.out.println(output_final.toString());
+            System.out.println(output_final.toString());*/
             if (algorithm.equals("taboo")) {       //Auswahl des Algorithmus TODO: Switch einbauen für Genetisch
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000,maxRuntimeMillis);
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
+                System.out.println("Erwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
             }
             //for (Route route : routes) {
             //    System.out.println(route);   
