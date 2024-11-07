@@ -9,21 +9,26 @@ public class Cvrp_ls {
 
     public static void main(String[] args) {
         String filename;
-        String algorithm;
-        long maxRuntimeMillis = 0;
+        String algorithm;           
+        long maxRuntimeMillis = 0;  //Tabu | Genetische Suche
+        // int amountParents = 0;      //genetische Suche
+        // int amountChildren = 0;     //genetische Suche
+        // int amountGenerations = 0;  //genetische Suche
+
         if (args.length < 3) {
-            System.out.println("Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
+            System.out.println(
+                    "Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
             filename = "src/Loggi-n401-k23.vrp";
             algorithm = "greedy";
-            //TODO: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur Ausführung mit Run
-        }
-        else {
+            // TODO-MAX: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur
+            // Ausführung mit Run
+        } else {
             String instance = args[0];
             System.out.println(args[0]);
             algorithm = args[1];
             int seconds = Integer.parseInt(args[2]);
             maxRuntimeMillis = seconds * 1000L;
-            if (instance.equals("loggi")) {         //Auswahl der Instanz
+            if (instance.equals("loggi")) { // Auswahl der Instanz
                 filename = "src/Loggi-n401-k23.vrp";
             } else {
                 filename = "src/Testdaten_Loggi.vrp";
@@ -50,7 +55,9 @@ public class Cvrp_ls {
             Integer[][] distances = read_distances_from_txt(filename, dimension);
             ArrayList<Node> nodes = read_nodes_from_txt(filename);
             Integer[][] demands = read_demands_from_txt(filename, dimension);
-
+            // StringBuilder output_diagonal = new StringBuilder();
+            // StringBuilder output_nodes = new StringBuilder();
+            // StringBuilder output_final = new StringBuilder();
             // Zuordnung von Knoten und Distanzen
             // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
             /**
@@ -76,9 +83,7 @@ public class Cvrp_ls {
              * der Algorithmus arbeitet nur mit "nodes", die anderen Strukturen waren fürs
              * Aufbauen
              
-            StringBuilder output_diagonal = new StringBuilder();
-            StringBuilder output_nodes = new StringBuilder();
-            StringBuilder output_final = new StringBuilder();
+
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 5; j++) {
                     output_diagonal.append(distances[i][j]).append("\t");
@@ -105,16 +110,32 @@ public class Cvrp_ls {
             }
             System.out.println(output_diagonal.toString() + "\n\n");
             System.out.println(output_nodes.toString());
+
             System.out.println(output_final.toString());*/
-            if (algorithm.equals("taboo")) {       //Auswahl des Algorithmus TODO: Switch einbauen für Genetisch
+            if (algorithm.equals("taboo")) {       // Auswahl des Algorithmus Tabu
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000,maxRuntimeMillis);
+
+            /* ______GENETISCHE_SUCHE_BAUSTELLE______
+            *else if (algorithm.equals("genetic")) { // Auswahl des Algorithmus genetisch
+                ArrayList<TSPInstance> parents = GeneticSearch.findStartInstances(nodes, capacity, parents);
+                if (maxRuntimeMillis == 0) {
+                    // TODO-Richard: Kinder-Generationen-basierte genetische Kombination bauen
+                    ArrayList<TSPInstance> grandsons = GeneticSearch.performPairingSized(parents, amountChildren,
+                            generations);
+                }
+             else {
+                    // TODO-Richard: Zeitbasierte genetische Kombination bauen
+                    ArrayList<TSPInstance> grandsons = GeneticSearch.performPairingRuntime(parents, maxRuntimeMillis);
+                }
+            *_________________________________________
+            */
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("Erwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
             }
-            //for (Route route : routes) {
-            //    System.out.println(route);   
-            //}
+            // for (Route route : routes) {
+            // System.out.println(route);
+            // }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,7 +145,7 @@ public class Cvrp_ls {
         for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist bei 0 -> Demand = 0
             if (nodes.get(i).getDemand() == 0) {
                 nodes.remove(i);
-                //Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
+                // Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
             }
         }
         return nodes;
@@ -165,7 +186,7 @@ public class Cvrp_ls {
                         values[coordx],
                         values[coordy]));
             }
-        } 
+        }
         reader.close();
         return nodes;
     }
@@ -256,13 +277,12 @@ public class Cvrp_ls {
     public static ArrayList<Route> find_Greedy_Set(ArrayList<Node> nodes, int capacity) {
         ArrayList<Route> routes = new ArrayList<Route>();
         int route_Counter = 1;
-        int demandCounter = 1; // 1 bis (Anzahl Knoten)
         Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
         System.out.println("Depot\naktuelle Route Nr. 1");
         while (current.getClosestDemandingNeighbor() != null) {
             StringBuilder output_final = new StringBuilder();
-            //den nächsten Nachbarn suchen
+            // den nächsten Nachbarn suchen
             Neighbor next = current.getClosestDemandingNeighbor();
 
             // Abarbeitung der Bedarfe und Kosten
@@ -270,34 +290,29 @@ public class Cvrp_ls {
             currentRoute.addCost(next.getDistance());
             next.getNode().reduceDemand(currentRoute.getCapacity());
             currentRoute.reduceCapacity(nodeDemand);
-            
 
-            //Verfolgungsausgabe
+            // Verfolgungsausgabe
             output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
             output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
             output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
                     + "verbleibende Kapazität " + currentRoute.getCapacity());
 
             // Route ist beendet, Wege zurück zu Depot und neue Route starten
-            if (currentRoute.getCapacity() == 0) {  
-                  // straight zurück zum Depot        
+            if (currentRoute.getCapacity() == 0) {
+                // straight zurück zum Depot
                 currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
                 routes.add(currentRoute); // Route abspeichern
                 currentRoute = new Route(capacity); // neue Route erstellen
-                route_Counter++;    //Zähler
-                current = nodes.get(0);//Nächste Suche von Depot aus, da neue Route
+                route_Counter++; // Zähler
+                current = nodes.get(0);// Nächste Suche von Depot aus, da neue Route
                 output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t");
                 output_final.append("\naktuelle Route Nr. " + route_Counter);
             }
             // Route kann noch weiter gehen, da Kapazität noch nicht erschöpft
             // Belieferungszähler um 1 erhöhen
-            else{
+            else {
                 current = next.getNode();
-                demandCounter++;
             }
-
-            
-            // TODO: Textausgabe der besuchten Knoten
             System.out.println(output_final.toString());
         }
         // letzte Route mit Restkapazität darf nicht fehlen
