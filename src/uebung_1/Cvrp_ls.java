@@ -10,16 +10,17 @@ public class Cvrp_ls {
     public static void main(String[] args) {
         String filename;
         if (args.length < 3) {
-            //System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
-            filename = "src/Testdaten_Loggi.vrp";
-            //TODO: Anweisung zur Bedienung der Kommandozeilenangabe (später anschalten)
+            System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
+            filename = "src/Loggi-n401-k23.vrp";
+            //TODO: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur Ausführung mit Run
         }
         else {
             String instance = args[0];
+            System.out.println(args[0]);
             String algorithm = args[1];
             int seconds = Integer.parseInt(args[2]);
             long maxRuntimeMillis = seconds * 1000L;
-            if (instance == "loggi") { 
+            if (instance.equals("loggi")) { 
                 filename = "src/Loggi-n401-k23.vrp";
             } else {
                 filename = "src/Testdaten_Loggi.vrp";
