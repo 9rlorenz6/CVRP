@@ -8,23 +8,24 @@ import java.util.ArrayList;
 public class Cvrp_ls {
 
     public static void main(String[] args) {
-        /*if (args.length < 3) {
-            System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
-            //TODO: Anweisung zur Bedienung der Kommandozeilenangabe (später anschalten)
-            return;
-        }
-        
-        String instanceFile = args[0];
-        String algorithm = args[1];
-        int seconds = Integer.parseInt(args[2]);
-        long maxRuntimeMillis = seconds * 1000L;*/
         String filename;
-        // Pfad zur Datei
-        if (args.length == 0) { //args[0] == "loggi"
-            filename = "src/Loggi-n401-k23.vrp";
-        } else {
-            filename = args[0];
+        if (args.length < 3) {
+            //System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
+            filename = "src/Testdaten_Loggi.vrp";
+            //TODO: Anweisung zur Bedienung der Kommandozeilenangabe (später anschalten)
         }
+        else {
+            String instance = args[0];
+            String algorithm = args[1];
+            int seconds = Integer.parseInt(args[2]);
+            long maxRuntimeMillis = seconds * 1000L;
+            if (instance == "loggi") { 
+                filename = "src/Loggi-n401-k23.vrp";
+            } else {
+                filename = "src/Testdaten_Loggi.vrp";
+            }
+        }
+
         String line = "";
         int dimension = 0;
         int capacity = 0;
