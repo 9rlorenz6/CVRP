@@ -9,18 +9,21 @@ public class Cvrp_ls {
 
     public static void main(String[] args) {
         String filename;
+        String algorithm;
+        long maxRuntimeMillis = 0;
         if (args.length < 3) {
             System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
             filename = "src/Loggi-n401-k23.vrp";
+            algorithm = "greedy";
             //TODO: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur Ausführung mit Run
         }
         else {
             String instance = args[0];
             System.out.println(args[0]);
-            String algorithm = args[1];
+            algorithm = args[1];
             int seconds = Integer.parseInt(args[2]);
-            long maxRuntimeMillis = seconds * 1000L;
-            if (instance.equals("loggi")) { 
+            maxRuntimeMillis = seconds * 1000L;
+            if (instance.equals("loggi")) {         //Auswahl der Instanz
                 filename = "src/Loggi-n401-k23.vrp";
             } else {
                 filename = "src/Testdaten_Loggi.vrp";
@@ -103,10 +106,14 @@ public class Cvrp_ls {
             System.out.println(output_diagonal.toString() + "\n\n");
             System.out.println(output_nodes.toString());
             System.out.println(output_final.toString());
-            ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-            for (Route route : routes) {
-                System.out.println(route);   
+            if (algorithm.equals("taboo")) {       //Auswahl des Algorithmus
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000,maxRuntimeMillis);
+            } else {
+                ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
             }
+            //for (Route route : routes) {
+            //    System.out.println(route);   
+            //}
         } catch (IOException e) {
             e.printStackTrace();
         }
