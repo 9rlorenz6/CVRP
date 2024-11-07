@@ -12,7 +12,7 @@ public class Cvrp_ls {
         String algorithm;
         long maxRuntimeMillis = 0;
         if (args.length < 3) {
-            System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
+            System.out.println("Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
             filename = "src/Loggi-n401-k23.vrp";
             algorithm = "greedy";
             //TODO: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur Ausführung mit Run
