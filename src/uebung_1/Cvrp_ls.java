@@ -102,12 +102,9 @@ public class Cvrp_ls {
 
     private static ArrayList<Node> allDemandsFulfilled(ArrayList<Node> nodes) {
         for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist bei 0 -> Demand = 0
-            if (nodes.get(i).getDemand() > 0) {
-                // nodes.remove(i); // Node[i=1] = Node(2) = Node mit ID = 3!!
-                // TODO: Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
-                continue;
-            } else {
+            if (nodes.get(i).getDemand() == 0) {
                 nodes.remove(i);
+                //Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
             }
         }
         return nodes;
