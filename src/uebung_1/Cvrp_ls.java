@@ -9,7 +9,7 @@ public class Cvrp_ls {
 
     public static void main(String[] args) {
         /*if (args.length < 3) {
-            System.out.println("Usage: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
+            System.out.println("Bedienung: ./cvrp <instance> <algorithm> <seconds> [<option>*]");
             //TODO: Anweisung zur Bedienung der Kommandozeilenangabe (später anschalten)
             return;
         }
