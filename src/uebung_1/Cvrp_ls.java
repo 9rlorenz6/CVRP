@@ -292,7 +292,7 @@ public class Cvrp_ls {
             currentRoute.reduceCapacity(nodeDemand);
 
             // Verfolgungsausgabe
-            output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
+            output_final.append("Nachbar ID: " + next.getNode().getId() + "\t");
             output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
             output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
                     + "verbleibende Kapazität " + currentRoute.getCapacity());
