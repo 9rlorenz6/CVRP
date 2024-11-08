@@ -3,9 +3,11 @@ package uebung_1;
 import java.util.ArrayList;
 
 public class Route {
-    private ArrayList<Node> checkpoints;
+    private ArrayList<Neighbor> checkpoints;
     private int capacity = 0;
     private int cost = 0;
+
+
     public int getCost() {
         return cost;
     }
@@ -36,15 +38,19 @@ public class Route {
         this.capacity = capacity;
     }
 
-    public ArrayList<Node> getCheckpoints() {
+    public ArrayList<Neighbor> getCheckpoints() {
         return checkpoints;
     }
 
-    public void setCheckpoints(ArrayList<Node> checkpoints) {
+    public void setCheckpoints(ArrayList<Neighbor> checkpoints) {
         this.checkpoints = checkpoints;
     }
 
-    public Route(ArrayList<Node> checkpoints) {
+    public Route(ArrayList<Neighbor> checkpoints) {
         this.checkpoints = checkpoints;
+    }
+
+    public void addCheckpoint(Neighbor neighbor){
+        checkpoints.add(neighbor);
     }
 }
