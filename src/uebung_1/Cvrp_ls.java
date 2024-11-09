@@ -9,17 +9,17 @@ public class Cvrp_ls {
 
     public static void main(String[] args) {
         String filename;
-        String algorithm;           
-        long maxRuntimeMillis = 0;  //Tabu | Genetische Suche
-        // int amountParents = 0;      //genetische Suche
-        // int amountChildren = 0;     //genetische Suche
-        // int amountGenerations = 0;  //genetische Suche
+        String algorithm = "genetic";
+        long maxRuntimeMillis = 3; // Tabu | Genetische Suche
+        int amountParents = 0; // genetische Suche
+        int amountChildren = 0; // genetische Suche
+        int amountGenerations = 0; // genetische Suche
 
         if (args.length < 3) {
             System.out.println(
                     "Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
-            filename = "src/Loggi-n401-k23.vrp";
-            algorithm = "greedy";
+            filename = "src/Testdaten_Loggi.vrp";
+            algorithm = "genetic";
             // TODO-MAX: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur
             // Ausführung mit Run
         } else {
@@ -82,60 +82,52 @@ public class Cvrp_ls {
              * Falls du dir eine Übersicht schaffen willst
              * der Algorithmus arbeitet nur mit "nodes", die anderen Strukturen waren fürs
              * Aufbauen
-             
-
-            for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 5; j++) {
-                    output_diagonal.append(distances[i][j]).append("\t");
-
-                }
-                output_nodes.append("ID: ").append(nodes.get(i).getId()).append("\t")
-                        .append("X = ").append(nodes.get(i).getCoordX()).append("\t")
-                        .append("Y = ").append(nodes.get(i).getCoordY()).append("\n");
-                output_diagonal.append("\n");
+             * 
+             * 
+             * for (int i = 0; i < 5; i++) {
+             * for (int j = 0; j < 5; j++) {
+             * output_diagonal.append(distances[i][j]).append("\t");
+             * 
+             * }
+             * output_nodes.append("ID: ").append(nodes.get(i).getId()).append("\t")
+             * .append("X = ").append(nodes.get(i).getCoordX()).append("\t")
+             * .append("Y = ").append(nodes.get(i).getCoordY()).append("\n");
+             * output_diagonal.append("\n");
+             * }
+             * 
+             * for (int i = 0; i < 5; i++) {
+             * ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
+             * for (int j = 0; j < neighbors.size(); j++) {
+             * if (j < 5) {
+             * output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
+             * output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() +
+             * "\t");
+             * output_final.append("Distanz: " + neighbors.get(j).getDistance() + "\t");
+             * output_final.append("Bedarf Knoten " + neighbors.get(j).getNode().getId() +
+             * ": "
+             * + neighbors.get(j).getNode().getDemand() + "\n");
+             * }
+             * }
+             * 
+             * }
+             * System.out.println(output_diagonal.toString() + "\n\n");
+             * System.out.println(output_nodes.toString());
+             * 
+             * System.out.println(output_final.toString());
+             */
+            // Tabu-Algorithmus
+            if (algorithm.equals("taboo")) { 
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000, maxRuntimeMillis);
             }
-
-            for (int i = 0; i < 5; i++) {
-                ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
-                for (int j = 0; j < neighbors.size(); j++) {
-                    if (j < 5) {
-                        output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
-                        output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() + "\t");
-                        output_final.append("Distanz: " + neighbors.get(j).getDistance() + "\t");
-                        output_final.append("Bedarf Knoten " + neighbors.get(j).getNode().getId() + ":  "
-                                + neighbors.get(j).getNode().getDemand() + "\n");
-                    }
-                }
-
-            }
-            System.out.println(output_diagonal.toString() + "\n\n");
-            System.out.println(output_nodes.toString());
-
-            System.out.println(output_final.toString());*/
-            if (algorithm.equals("taboo")) {       // Auswahl des Algorithmus Tabu
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000,maxRuntimeMillis);
-
-            /* ______GENETISCHE_SUCHE_BAUSTELLE______
-            *else if (algorithm.equals("genetic")) { // Auswahl des Algorithmus genetisch
-                ArrayList<TSPInstance> parents = GeneticSearch.findStartInstances(nodes, capacity, parents);
-                if (maxRuntimeMillis == 0) {
-                    // TODO-Richard: Kinder-Generationen-basierte genetische Kombination bauen
-                    ArrayList<TSPInstance> grandsons = GeneticSearch.performPairingSized(parents, amountChildren,
-                            generations);
-                }
-             else {
-                    // TODO-Richard: Zeitbasierte genetische Kombination bauen
-                    ArrayList<TSPInstance> grandsons = GeneticSearch.performPairingRuntime(parents, maxRuntimeMillis);
-                }
-            *_________________________________________
-            */
+             // Genetischer Algorithmus 
+             //TODO: Hart-gecodete Parameter rückgängig machen
+            else if (algorithm.equals("genetic")) {
+                    LimitedSizeList<TSPInstance> grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 3);
+                    System.out.println(grandsons.toString());
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("Erwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
             }
-            // for (Route route : routes) {
-            // System.out.println(route);
-            // }
         } catch (IOException e) {
             e.printStackTrace();
         }

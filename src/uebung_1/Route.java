@@ -7,7 +7,10 @@ public class Route {
     private int capacity = 0;
     private int cost = 0;
 
-
+    public Route(int capacity) {
+        this.capacity = capacity;
+        this.checkpoints = new ArrayList<Neighbor>();
+    }
     public int getCost() {
         return cost;
     }
@@ -23,9 +26,7 @@ public class Route {
         return capacity;
     }
 
-    public Route(int capacity) {
-        this.capacity = capacity;
-    }
+  
     public void reduceCapacity(int demand) {
         if(demand > this.capacity){
             this.capacity = 0;
