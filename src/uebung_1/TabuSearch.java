@@ -7,49 +7,52 @@ public class TabuSearch {
     public static ArrayList<Route> find_Tabu_Set(ArrayList<Node> nodes, int capacity, int tabuTenure, long maxRuntimeMillis) {
         ArrayList<Route> bestRoutes = new ArrayList<>();
         LinkedList<Route> tabuList = new LinkedList<>();
-        int routeCounter = 1;
-
-        Route currentRoute = new Route(capacity);
         ArrayList<Route> candidateRoutes = new ArrayList<>();
         ArrayList<Route> routes = new ArrayList<>();
-        
-        int demandCounter = 1;
+        Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
-        System.out.println("Depot\naktuelle Route Nr. 1");
-
         Route bestCandidate = null;
-
+        int routeCounter = 0;
+        int try_counter = 0;
+        int totalCost = 0;
+        int demandCounter = 1;
+        int id = 0;
         // Laufzeitmessung starten
         long startTime = System.currentTimeMillis();
-
         // Tabu-Suche Schleife mit Laufzeitbegrenzung und ohne maxIterations
-        while (System.currentTimeMillis() - startTime < maxRuntimeMillis) {
+        while (System.currentTimeMillis() - startTime < maxRuntimeMillis/10) {
             StringBuilder output_final = new StringBuilder();
             Neighbor next = current.getClosestDemandingNeighbor();
             // Falls keine Nachbarn mehr mit Bedarf vorhanden sind, neu starten
+            if (Math.random() < 0.1) {  // 10% Wahrscheinlichkeit
+                id = (int)(Math.random() * nodes.size());
+                System.out.println(id);
+                next = current.getNeighborById(id);
+            } else {
+                next = current.getClosestDemandingNeighbor();
+            }
             if (next == null) {
-                current = getNodeById(nodes, 1); // Startpunkt bei Depot 
-                System.out.println(current.getId());
-                
+                totalCost = totalCost + currentRoute.getCost();
+                current = getNodeById(nodes, 1); // Startpunkt bei Depot      
                 for (int i = 1; i < nodes.size();i++){
                     nodes.get(i).setCleared(false);
                 }
                 next = current.getClosestDemandingNeighbor();
-                break;
+                try_counter++;
+                //neuer Durchlauf geht los
+                output_final.append("\n Durchlauf " +  try_counter + "\tAnzahl Runden:" + routeCounter + "\t Gesamtkosten: " + totalCost);
+                output_final.append("\t " + tabuList.getFirst() + ":" + tabuList.getLast());
+                routeCounter = 0;
+                totalCost = 0;
             }
-
             int nodeDemand = next.getNode().getDemand();
             currentRoute.addCost(next.getDistance());
-            next.getNode().reduceDemand(currentRoute.getCapacity());
+            next.getNode().setCleared(true);
             currentRoute.reduceCapacity(nodeDemand);
-
-            output_final.append("\t" + "Nachbar ID: " + next.getNode().getId() + "\t");
-            output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
-            output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
-                    + "verbleibende Kapazität " + currentRoute.getCapacity());
 
             if (currentRoute.getCapacity() == 0) {  
                 currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
+                totalCost = totalCost + currentRoute.getCost();
                 candidateRoutes.add(currentRoute);
                 
                 if (bestCandidate == null || currentRoute.getCost() < bestCandidate.getCost()) {
@@ -62,18 +65,18 @@ public class TabuSearch {
                         tabuList.poll();
                     }
                     tabuList.offer(currentRoute);
-                    routeCounter++;
+                    
                 }
-
+                //System.out.println();
                 currentRoute = new Route(capacity);
                 current = nodes.get(0);
-                output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t");
-                output_final.append("\naktuelle Route Nr. " + routeCounter);
+                routeCounter++;
+                
             } else {
                 current = next.getNode();
                 demandCounter++;
             }
-            System.out.println(output_final.toString());
+            System.out.print(output_final.toString());
         }
         
         routes.add(currentRoute);

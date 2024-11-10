@@ -117,4 +117,29 @@ public class Node implements Comparator<Node> {
         }
         return closestNeighbor;
     }
+
+    public Neighbor getClosestAllowedDemandingNeighbor() {
+        int i = 0;  //Depot ist 1, daher bei 2 anfangen
+        Neighbor closestNeighbor = null;
+        if (neighbors.size() == 0) {
+            return null;
+        }
+        while (i < neighbors.size()) {
+           Neighbor nextNeighbor = neighbors.get(i);
+            if (!nextNeighbor.getNode().isCleared()) { // voll versorgte Nachbarn überspringen
+                if (closestNeighbor == null
+                ||  nextNeighbor.getDistance() < closestNeighbor.getDistance())  {
+                    //Erster Knoten mit Bedarf wird Vergleichsknoten
+                   closestNeighbor = nextNeighbor;
+                }
+            }
+            i++;
+        }
+        if ((closestNeighbor == null) && (this.id != 1)){
+            //Sicherheitshalber; Rückkehr zu Depot, keine Nachbarn übrig
+            closestNeighbor = this.getNeighborById(1);
+        }
+        return closestNeighbor;
+
+    }
 }

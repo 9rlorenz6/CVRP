@@ -18,7 +18,7 @@ public class Cvrp_ls {
         if (args.length < 3) {
             System.out.println(
                     "Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
-            filename = "src/Testdaten_Loggi.vrp";
+            filename = "src/Loggi-n401-k23.vrp";
             algorithm = "greedy";
             // TODO-MAX: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur
             // Ausführung mit Run
@@ -82,7 +82,7 @@ public class Cvrp_ls {
            
             // Tabu-Algorithmus
             if (algorithm.equals("taboo")) { 
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000, maxRuntimeMillis);
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 399, maxRuntimeMillis);
             }
              // Genetischer Algorithmus 
              //TODO: Hart-gecodete Parameter rückgängig machen
@@ -239,6 +239,7 @@ public class Cvrp_ls {
         Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
         Neighbor next = current.getClosestDemandingNeighbor();
+        int totalCost = 0;
         System.out.println("Depot\naktuelle Route Nr. 1");
         while (current.getClosestDemandingNeighbor() != null) {
             StringBuilder output_final = new StringBuilder();
@@ -255,14 +256,14 @@ public class Cvrp_ls {
             // Verfolgungsausgabe
             output_final.append("Nachbar ID: " + next.getNode().getId() + "\t");
             output_final.append("\t" + "Distanz: " + next.getDistance() + "\t" + "Bedarf: " + nodeDemand);
-            output_final.append("\t" + "verbleibender Bedarf: " + next.getNode().getDemand() + "\t"
-                    + "verbleibende Kapazität " + currentRoute.getCapacity());
+            output_final.append("\t" + "verbleibende Kapazität " + currentRoute.getCapacity());
 
             // Route ist beendet, Wege zurück zu Depot und neue Route starten
             if (currentRoute.getCapacity() == 0) {
                 // straight zurück zum Depot
                 currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
                 routes.add(currentRoute); // Route abspeichern
+                totalCost = totalCost + currentRoute.getCost();
                 currentRoute = new Route(capacity); // neue Route erstellen
                 route_Counter++; // Zähler
                 current = nodes.get(0);// Nächste Suche von Depot aus, da neue Route
@@ -274,11 +275,12 @@ public class Cvrp_ls {
             else {
                 current = next.getNode();
             }
-            output_final.append("\n\n" + "Gesamtkosten: " + currentRoute.getCost());
             System.out.println(output_final.toString());
         }
         // letzte Route mit Restkapazität darf nicht fehlen
         routes.add(currentRoute);
+        totalCost = totalCost + currentRoute.getCost();
+        System.out.println("\n\n" + "Gesamtkosten: " + totalCost);
         return routes;
     }
 
