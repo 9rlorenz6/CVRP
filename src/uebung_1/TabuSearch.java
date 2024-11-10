@@ -29,9 +29,7 @@ public class TabuSearch {
 
             // Falls keine Nachbarn mehr mit Bedarf vorhanden sind, abbrechen
             if (next == null) {
-                nodes = read_nodes_from_txt(filename);
-                Integer[][] demands = read_demands_from_txt(filename, dimension);
-                demands = read_demands_from_txt(filename, dimension);
+
                 current = getNodeById(nodes, 1); // Startpunkt bei Depot
             }
 
