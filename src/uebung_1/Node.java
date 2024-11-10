@@ -111,7 +111,7 @@ public class Node implements Comparator<Node> {
             }
             i++;
         }
-        if (closestNeighbor == null ){
+        if ((closestNeighbor == null) && (this.id != 1)){
             //Sicherheitshalber; Rückkehr zu Depot, keine Nachbarn übrig
             closestNeighbor = this.getNeighborById(1);
         }

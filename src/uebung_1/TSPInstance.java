@@ -158,8 +158,10 @@ public class TSPInstance {
 
     public String permToString() {
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < permutation.length; i++) {
-            result.append("\t[" + i + "] -> " + "[" + permutation[i] + "]\n");
+        result.append("\n");
+        for (int i = 0; i < permutation.length-1; i++) {
+            result.append("\t[" + permutation[i] + "] -> " + "[" + permutation[i+1] + "\n");
+            
         }
         return result.toString();
     }

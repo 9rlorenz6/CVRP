@@ -90,6 +90,7 @@ public class Cvrp_ls {
                     LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 3000);
 
                     System.out.println("bestes Ergebnis:\n" + grandsons.getUpperBest().toString());
+                    System.out.println("Permutation:" + grandsons.getUpperBest().permToString());
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
@@ -239,7 +240,7 @@ public class Cvrp_ls {
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
         Neighbor next = current.getClosestDemandingNeighbor();
         System.out.println("Depot\naktuelle Route Nr. 1");
-        while (current.getClosestDemandingNeighbor() != null && !next.getNode().isCleared()) {
+        while (current.getClosestDemandingNeighbor() != null) {
             StringBuilder output_final = new StringBuilder();
             // den nächsten Nachbarn suchen
         
@@ -248,7 +249,7 @@ public class Cvrp_ls {
             // Abarbeitung der Bedarfe und Kosten
             int nodeDemand = next.getNode().getDemand();
             currentRoute.addCost(next.getDistance());
-            next.getNode().reduceDemand(currentRoute.getCapacity());
+            next.getNode().setCleared(true);
             currentRoute.reduceCapacity(nodeDemand);
 
             // Verfolgungsausgabe

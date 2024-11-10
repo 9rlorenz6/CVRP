@@ -170,7 +170,6 @@ public class GeneticSearch {
         while (true) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             long remainingTime = maxRuntimeMillis - elapsedTime;
-            System.out.println("Restzeit: " + remainingTime +"\n");
             if(remainingTime <= 0){
                 break;
             }
@@ -188,6 +187,7 @@ public class GeneticSearch {
                     childId = parents.size() + 1;
                 }
                 childId++;
+                System.out.println("Kosten von Kind: " + child.getId() + "\t" + child.getTotalCost() + "\n");
             }
             parentBase++;
         }
