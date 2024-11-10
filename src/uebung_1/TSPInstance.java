@@ -24,13 +24,16 @@ public class TSPInstance {
     }
 
     // Kinderkonstruktor mit Permutation -> Routen und Kosten rückwärts erzeugen
-    public TSPInstance(ArrayList<Node> nodes, int[] permutation, int capacity, int parent1, int parent2) {
+    public TSPInstance(ArrayList<Node> nodes, int[] permutation, int capacity, int parent1, int parent2, int id ) {
         this.permutation = permutation;
         this.capacity = capacity;
-        this.routes = buildRoutesFromPermutation(nodes, permutation, capacity);
-        this.totalCost = calcTotalCosts(this.routes);
+        this.dimension = permutation.length;
         this.parent1 = parent1;
         this.parent2 = parent2;
+        this.id  = id;
+        this.routes = buildRoutesFromPermutation(nodes, permutation, capacity);
+        this.totalCost = calcTotalCosts(this.routes);
+
     }
 
     public int getId() {
@@ -73,33 +76,40 @@ public class TSPInstance {
     private ArrayList<Route> buildRoutesFromPermutation(ArrayList<Node> nodes, int[] permutation, int capacity) {
         ArrayList<Route> routes = new ArrayList<Route>();
         Route route = new Route(capacity);
-        int routeCounter = 1;
+        // int routeCounter = 1;
         int start = findStartInPerm(permutation, 1);// Start bei Depot
         int nextEntry = ((start + 1) % permutation.length); // Wenn Depot letzter Punkt, step = perm[0] wegen Modulo
-        System.out.println("Route: "+routeCounter);
+        // System.out.println("Route: "+routeCounter);
         Node current = Cvrp_ls.getNodeById(nodes, permutation[start]);  //ist das Depot am Anfang
-        while (nextEntry != start) {
+        Neighbor next = current.getNeighborById(permutation[nextEntry]);
+
+        while (permutation[nextEntry]!= 1) {
             
-            Neighbor next = current.getNeighborById(permutation[nextEntry]);
+            if(next == null){
+                break;
+            }
             if (route.getCapacity() >= next.getNode().getDemand()) {
                 route.addCheckpoint(next);
                 route.addCost(next.getDistance());
-                System.out.println("\n\tSchritt zu: " + next.getNode().getId());
+                route.reduceCapacity(next.getNode().getDemand());
+                // System.out.println("\n\tSchritt zu: " + next.getNode().getId());
                 current = next.getNode();
             } else {
                 route.addCheckpoint(current.getNeighborById(1));//zurück zum Depot
                 route.addCost(current.getNeighborById(1).getDistance());
-                System.out.println("\n\tSchritt zu: " + next.getNode().getId());
                 current = current.getNeighborById(1).getNode();
-                System.out.println("\n\tSchritt zu: " + current.getId());
+                // System.out.println("\n\tSchritt zu: " + current.getId());
                 routes.add(route);
-                routeCounter++;
+                // routeCounter++;
                 route = new Route(capacity);
-                System.out.println("Route: "+routeCounter);
+                // System.out.println("Route: "+routeCounter);
                 continue;
             }
+
             nextEntry = (nextEntry + 1) % permutation.length;
+            next = current.getNeighborById(permutation[nextEntry]);
         }
+        routes.add(route);
         return routes;
     }
 
@@ -149,15 +159,15 @@ public class TSPInstance {
     public String permToString() {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < permutation.length; i++) {
-            result.append("[" + i + "] -> " + "[" + permutation[i] + "]\n");
+            result.append("\t[" + i + "] -> " + "[" + permutation[i] + "]\n");
         }
         return result.toString();
     }
 
     public String toString() {
         StringBuilder instanceDetails = new StringBuilder();
-        instanceDetails.append("\n" + "Eltern: " + parent1 + " + " + parent2 + "\t").append("\tKosten: " + totalCost)
-                .append("\tAnzahl Routen: " + routes.size());
+        instanceDetails.append("Eltern: " + parent1 + " + " + parent2 + "\t").append("\tKosten: " + totalCost)
+                    .append("\tAnzahl Routen: " + routes.size());
 
         return instanceDetails.toString();
     }

@@ -55,16 +55,7 @@ public class Cvrp_ls {
             Integer[][] distances = read_distances_from_txt(filename, dimension);
             ArrayList<Node> nodes = read_nodes_from_txt(filename);
             Integer[][] demands = read_demands_from_txt(filename, dimension);
-            // StringBuilder output_diagonal = new StringBuilder();
-            // StringBuilder output_nodes = new StringBuilder();
-            // StringBuilder output_final = new StringBuilder();
-            // Zuordnung von Knoten und Distanzen
-            // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
-            /**
-             * row + 1 = untere Knoten-ID (zählt ab 1 nicht ab 0)
-             * col + 1 = obere Knoten-ID
-             * row/col = Distanz von unterer zu oberer Knoten-ID
-             */
+            
             for (int row = 0; row < distances.length; row++) {
                 Node current = nodes.get(row); // Knoten der aktuellen Zeile
                 for (int col = 0; col < distances[row].length; col++) {
@@ -74,47 +65,10 @@ public class Cvrp_ls {
                     current.setDemand(demands[row][1]);
                     current.addNeighbor(new Neighbor(nodes.get(col), // Knoten-ID des Nachbarn
                             distances[row][col])); // Distanz zu ihm
-                    // Bedarf ([0=NodeID][1=Demand-Menge])
+
                 }
             }
-            /**
-             * Testausgaben erste 5 Zeilen/Knoten
-             * Falls du dir eine Übersicht schaffen willst
-             * der Algorithmus arbeitet nur mit "nodes", die anderen Strukturen waren fürs
-             * Aufbauen
-             * 
-             * 
-             * for (int i = 0; i < 5; i++) {
-             * for (int j = 0; j < 5; j++) {
-             * output_diagonal.append(distances[i][j]).append("\t");
-             * 
-             * }
-             * output_nodes.append("ID: ").append(nodes.get(i).getId()).append("\t")
-             * .append("X = ").append(nodes.get(i).getCoordX()).append("\t")
-             * .append("Y = ").append(nodes.get(i).getCoordY()).append("\n");
-             * output_diagonal.append("\n");
-             * }
-             * 
-             * for (int i = 0; i < 5; i++) {
-             * ArrayList<Neighbor> neighbors = nodes.get(i).getNeighbors();
-             * for (int j = 0; j < neighbors.size(); j++) {
-             * if (j < 5) {
-             * output_final.append("aktueller Knoten " + nodes.get(i).getId()).append("\t");
-             * output_final.append("Nachbar ID: " + neighbors.get(j).getNode().getId() +
-             * "\t");
-             * output_final.append("Distanz: " + neighbors.get(j).getDistance() + "\t");
-             * output_final.append("Bedarf Knoten " + neighbors.get(j).getNode().getId() +
-             * ": "
-             * + neighbors.get(j).getNode().getDemand() + "\n");
-             * }
-             * }
-             * 
-             * }
-             * System.out.println(output_diagonal.toString() + "\n\n");
-             * System.out.println(output_nodes.toString());
-             * 
-             * System.out.println(output_final.toString());
-             */
+           
             // Tabu-Algorithmus
             if (algorithm.equals("taboo")) { 
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000, maxRuntimeMillis);
@@ -122,8 +76,10 @@ public class Cvrp_ls {
              // Genetischer Algorithmus 
              //TODO: Hart-gecodete Parameter rückgängig machen
             else if (algorithm.equals("genetic")) {
-                    LimitedSizeList<TSPInstance> grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 3);
-                    System.out.println(grandsons.toString());
+                    LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 3000);
+
+                    System.out.println("unteres Top-Ergebnis:\n" + grandsons.getLowerBest().toString());
+                    System.out.println("oberes Top-Ergebnis:\n" + grandsons.getUpperBest().toString());
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("Erwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");

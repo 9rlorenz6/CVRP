@@ -2,24 +2,24 @@ package uebung_1;
 
 import java.util.LinkedList;
 
-public class LimitedSizeList<T> {
+public class LimitedSizeList {
     private final int maxSize;
-    private final LinkedList<T> list;
+    private final LinkedList<TSPInstance> list;
 
     public LimitedSizeList(int maxSize) {
         this.maxSize = maxSize;
-        this.list = new LinkedList<>();
+        this.list = new LinkedList<TSPInstance>();
     }
 
-    public void add(T element) {
+    public void add(TSPInstance instance) {
         // Überprüfen, ob die maximale Größe erreicht wurde
         if (list.size() >= maxSize) {
             list.removeFirst(); // Entfernt das älteste Element
         }
-        list.addLast(element); // Fügt das neue Element am Ende hinzu
+        list.addLast(instance); // Fügt das neue Element am Ende hinzu
     }
 
-    public T get(int index) {
+    public TSPInstance get(int index) {
         return list.get(index);
     }
 
@@ -27,14 +27,31 @@ public class LimitedSizeList<T> {
         return list.size();
     }
 
-    public LinkedList<T> getList() {
+    public LinkedList<TSPInstance> getList() {
         return list;
     }
-
+    public TSPInstance getLowerBest(){
+        TSPInstance lowerBest = null;
+        for (TSPInstance tspInstance : list) {
+            if(lowerBest == null || tspInstance.getTotalCost() > lowerBest.getTotalCost()){
+                lowerBest = tspInstance;
+            }
+        }
+            return lowerBest;
+    }
+    public TSPInstance getUpperBest(){
+        TSPInstance upperBest = null;
+        for (TSPInstance tspInstance : list) {
+            if(upperBest == null || tspInstance.getTotalCost() < upperBest.getTotalCost()){
+                upperBest = tspInstance;
+            }
+        }
+            return upperBest;
+    }
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
-        for (T t : list) {
+        for (TSPInstance t : list) {
             string.append(t.toString());
         }
         return string.toString();
