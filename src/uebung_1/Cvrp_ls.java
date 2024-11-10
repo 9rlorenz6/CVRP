@@ -20,7 +20,7 @@ public class Cvrp_ls {
                     "Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
             filename = "src/Loggi-n401-k23.vrp";
             algorithm = "greedy";
-            // TODO-MAX: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur
+            // Anweisung zur Bedienung der Kommandozeilenangabe
             // Ausführung mit Run
         } else {
             String instance = args[0];
@@ -54,7 +54,9 @@ public class Cvrp_ls {
             // Koordinatenspeicher
             Integer[][] distances = read_distances_from_txt(filename, dimension);
             ArrayList<Node> nodes = read_nodes_from_txt(filename);
+            ArrayList<Node> nodes_safe = nodes;     //Duplikat zum Zurücksetzen
             Integer[][] demands = read_demands_from_txt(filename, dimension);
+            Integer[][] demands_safe = demands;     //Duplikat zum Zurücksetzen
             // StringBuilder output_diagonal = new StringBuilder();
             // StringBuilder output_nodes = new StringBuilder();
             // StringBuilder output_final = new StringBuilder();
@@ -113,7 +115,7 @@ public class Cvrp_ls {
 
             System.out.println(output_final.toString());*/
             if (algorithm.equals("taboo")) {       // Auswahl des Algorithmus Tabu
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 100,maxRuntimeMillis,filename);
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, nodes_safe, demands, demands_safe,capacity, 100,maxRuntimeMillis,filename);
 
             /* ______GENETISCHE_SUCHE_BAUSTELLE______
             *else if (algorithm.equals("genetic")) { // Auswahl des Algorithmus genetisch
@@ -141,7 +143,7 @@ public class Cvrp_ls {
         }
     }
 
-    private static ArrayList<Node> allDemandsFulfilled(ArrayList<Node> nodes) {
+    private static ArrayList<Node> allDemandsFulfilled(ArrayList<Node> nodes) { //TODO: die eigentlich zum Entfernen von Knoten vorgesehene Methode wird nicht angesprochen
         for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist bei 0 -> Demand = 0
             if (nodes.get(i).getDemand() == 0) {
                 nodes.remove(i);
