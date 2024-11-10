@@ -30,10 +30,12 @@ public class TabuSearch {
             if (next == null) {
                 current = getNodeById(nodes, 1); // Startpunkt bei Depot 
                 System.out.println(current.getId());
+                
+                for (int i = 1; i < nodes.size();i++){
+                    nodes.get(i).setCleared(false);
+                }
                 next = current.getClosestDemandingNeighbor();
-                System.out.println(nodes.size()+ ": "  + next);
-
-                //demands
+                break;
             }
 
             int nodeDemand = next.getNode().getDemand();
@@ -71,7 +73,6 @@ public class TabuSearch {
                 current = next.getNode();
                 demandCounter++;
             }
-            output_final.append("\n" + " verbleibende Zeit: " + (System.currentTimeMillis() - startTime));
             System.out.println(output_final.toString());
         }
         

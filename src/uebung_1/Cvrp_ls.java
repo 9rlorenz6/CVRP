@@ -19,7 +19,7 @@ public class Cvrp_ls {
             System.out.println(
                     "Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
             filename = "src/Testdaten_Loggi.vrp";
-            algorithm = "genetic";
+            algorithm = "greedy";
             // TODO-MAX: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur
             // Ausführung mit Run
         } else {
@@ -237,11 +237,13 @@ public class Cvrp_ls {
         int route_Counter = 1;
         Route currentRoute = new Route(capacity);
         Node current = getNodeById(nodes, 1); // Startpunkt bei Depot
+        Neighbor next = current.getClosestDemandingNeighbor();
         System.out.println("Depot\naktuelle Route Nr. 1");
-        while (current.getClosestDemandingNeighbor() != null) {
+        while (current.getClosestDemandingNeighbor() != null && !next.getNode().isCleared()) {
             StringBuilder output_final = new StringBuilder();
             // den nächsten Nachbarn suchen
-            Neighbor next = current.getClosestDemandingNeighbor();
+        
+            next = current.getClosestDemandingNeighbor();
 
             // Abarbeitung der Bedarfe und Kosten
             int nodeDemand = next.getNode().getDemand();

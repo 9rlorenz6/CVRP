@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Cvrp_ls",
+            "request": "launch",
+            "mainClass": "uebung_1.Cvrp_ls",
+            "projectName": "CVRP_f422f1d"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
