@@ -89,8 +89,7 @@ public class Cvrp_ls {
             else if (algorithm.equals("genetic")) {
                     LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 3000);
 
-                    System.out.println("unteres Top-Ergebnis:\n" + grandsons.getLowerBest().toString());
-                    System.out.println("oberes Top-Ergebnis:\n" + grandsons.getUpperBest().toString());
+                    System.out.println("bestes Ergebnis:\n" + grandsons.getUpperBest().toString());
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");

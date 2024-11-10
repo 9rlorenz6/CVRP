@@ -170,7 +170,7 @@ public class GeneticSearch {
         while (true) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             long remainingTime = maxRuntimeMillis - elapsedTime;
-            System.out.println("Restzeit: " + elapsedTime +"\n");
+            System.out.println("Restzeit: " + remainingTime +"\n");
             if(remainingTime <= 0){
                 break;
             }
