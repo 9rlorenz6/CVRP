@@ -57,4 +57,13 @@ public class LimitedSizeList {
         return string.toString();
     }
 
+    public boolean notContaining(int id) {
+        for (TSPInstance tspInstance : list) {
+            if(tspInstance.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

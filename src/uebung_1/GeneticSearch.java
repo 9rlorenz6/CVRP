@@ -6,9 +6,8 @@ import java.util.Arrays;
 import javax.swing.table.TableRowSorter;
 
 public class GeneticSearch {
-    public static final int parentsDefault = 10;
+
     public static double sizeOfSides = 0.3; // Linke und Rechte Seite sollen Platz für Mitte lassen
-    private static final double leastFitnessFactor = 1.1; 
 
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
@@ -18,7 +17,8 @@ public class GeneticSearch {
      * @param parent2 Elternteil 2
      * @return einzelnes Kind dieser Kombination
      */
-    public static TSPInstance combineGenetics(ArrayList<Node> nodes, TSPInstance parent1, TSPInstance parent2, int childId) {
+    public static TSPInstance combineGenetics(ArrayList<Node> nodes, TSPInstance parent1, TSPInstance parent2,
+            int childId) {
         int[] newPerm = new int[parent1.getDimension()];
         int left = (int) (newPerm.length * sizeOfSides);
         int right = (int) (newPerm.length - left);
@@ -32,10 +32,10 @@ public class GeneticSearch {
         for (int i = right; i < newPerm.length; i++) {
             newPerm[i] = parent1.getPermutation()[i]; // Rechts von P1 verwenden
         }
+
+        // System.out.println("Kind: " + childId + "\tEltern: " + parent1.getId() + " + " + parent2.getId());
         int[] repairedPerm = GeneticSearch.repairCrossover(parent1, parent2, newPerm, left, right);
-        if(repairedPerm.length == 0){
-            return null;
-        }
+
         TSPInstance child = new TSPInstance(nodes, repairedPerm, parent1.getCapacity(), parent1.getId(),
                 parent2.getId(), childId);
         return child;
@@ -63,7 +63,6 @@ public class GeneticSearch {
             ArrayList<Route> routes = new ArrayList<Route>(); // Routen für jede Instanz
             // Loop für Routen der konkreten Instanz
             while (current.getClosestDemandingNeighbor() != null) {
-                StringBuilder output_final = new StringBuilder();
 
                 /**
                  * zum Start der Route einen zufälligen neuen Startpunkt erzeugen dadurch
@@ -97,10 +96,6 @@ public class GeneticSearch {
                     currentRoute = new Route(capacity); // neue Route erstellen
                     route_Counter++; // Zähler
                     current = nodes.get(0);// Nächste Suche von Depot aus, da neue Route
-                    // output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t" + "Distanz: "
-                    //         + next.getNode().getNeighborById(1).getDistance());
-                    // output_final.append("\naktuelle Route Nr. " + route_Counter);
-                    // System.out.println(output_final.toString());
                     continue;
                 }
                 currentRoute.addCost(next.getDistance());
@@ -108,14 +103,6 @@ public class GeneticSearch {
                 currentRoute.reduceCapacity(nodeDemand);
                 currentRoute.addCheckpoint(next);
 
-                // Verfolgungsausgabe
-                // output_final.append("\tNachbar ID: " + next.getNode().getId() + "\t");
-                // output_final.append("\tDistanz: " + next.getDistance() + "\t" + "Bedarf:" + nodeDemand);
-                // output_final.append("\tverbleibende Kapazität " + currentRoute.getCapacity());
-                // System.out.println(output_final.toString());
-
-                // Route kann noch weiter gehen, da Kapazität noch nicht erschöpft
-                // Belieferungszähler um 1 erhöhen
                 current = next.getNode();
             }
             // letzte Route mit Restkapazität darf nicht fehlen
@@ -151,7 +138,7 @@ public class GeneticSearch {
     public static LimitedSizeList findGeneticSetWithTime(ArrayList<Node> nodes, int capacity,
             long maxRuntimeMillis) {
         // Elterninstanzen
-        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, parentsDefault);
+        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, (nodes.size() / 2));
         StringBuilder parentInfo = new StringBuilder();
         for (TSPInstance tspInstance : parents) {
             parentInfo.append("\nElternID: " + tspInstance.getId())
@@ -165,32 +152,33 @@ public class GeneticSearch {
 
         // alle Eltern ein Mal durchtesten (1,2 | 1,3 | 1,4 | 2,3 | 2,4 | 3,4)
         int parentBase = 0;
+        int parentRun = parentBase + 1;
         ArrayList<TSPInstance> nextGeneration = new ArrayList<TSPInstance>();
         LimitedSizeList mostFit = new LimitedSizeList(5);
         while (true) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             long remainingTime = maxRuntimeMillis - elapsedTime;
-            if(remainingTime <= 0){
+            if (remainingTime <= 0) { // Zeit abgelaufen
                 break;
             }
-
-            for (int parentRun = parentBase + 1; parentRun < parents.size(); parentRun++) {
-                TSPInstance child = combineGenetics(nodes, parents.get(parentBase), parents.get(parentRun), childId);
-                System.out.println(child.toString());
-                nextGeneration.add(child);
-                if (child.getTotalCost() <= (int) (GeneticSearch.getFittest(parents)*leastFitnessFactor)) {
-                    mostFit.add(child);
-                }
-                if (parentRun + 1 == parents.size()) {
-                    parents = nextGeneration;
-                    nextGeneration = new ArrayList<TSPInstance>();
-                    childId = parents.size() + 1;
-                }
-                childId++;
-                System.out.println("Kosten von Kind: " + child.getId() + "\t" + child.getTotalCost() + "\n");
+            TSPInstance child = combineGenetics(nodes, parents.get(parentBase), parents.get(parentRun), childId);
+            childId++;
+            nextGeneration.add(child);
+            if ((mostFit.size() < 5)
+                    || ((child.getTotalCost() < mostFit.getLowerBest().getTotalCost()
+                            && mostFit.notContaining(child.getId())))) {
+                mostFit.add(child);
             }
-            parentBase++;
+            parentRun++;
+            if (parentRun == parents.size()) { // Ende der Parent-1-Kette
+                parentBase++;
+                parentRun = parentBase + 1;
+                if(parentBase == parents.size()-1){
+                    break;
+                }
+            }
         }
+        System.out.println("Erzeugte Kinder: " + (childId-1));
         return mostFit;
     }
 

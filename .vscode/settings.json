@@ -4,9 +4,5 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
     ],
-    "java.format.settings.url": ".vscode/java-formatter.xml",
-    "[java]": {
-        "editor.insertSpaces": false,
-        "editor.tabSize": 5
-    }
+    "java.debug.settings.onBuildFailureProceed": true
 }
