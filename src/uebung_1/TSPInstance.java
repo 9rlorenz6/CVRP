@@ -63,8 +63,7 @@ public class TSPInstance {
 
     /**
      * [3,2,5,1,6] -> Gehe von 1 zu 6 und schaue, wann wegen Kapazität zu 1
-     * zurückgekehrt werden muss
-     * um die Kosten zu berechnen
+     * zurückgekehrt werden muss um die Kosten zu berechnen
      * 
      * @param nodes
      * @param permutation
@@ -74,43 +73,67 @@ public class TSPInstance {
     private ArrayList<Route> buildRoutesFromPermutation(ArrayList<Node> nodes, int[] permutation, int capacity) {
         ArrayList<Route> routes = new ArrayList<Route>();
         Route route = new Route(capacity);
-        int steps = 0;
-
-        Node depot = Cvrp_ls.getNodeById(nodes, 1); // Start wie immer bei Depot
-        while (steps < nodes.size() - 1) {
-            Node next = Cvrp_ls.getNodeById(nodes, permutation[steps]);
-            if (route.getCapacity() >= next.getDemand()) {
-                route.addCheckpoint(new Neighbor(next,
-                        next.getNeighborById(permutation[steps]).getDistance()));
-            } else {// TODO-Richard: Rückwärts-Erstellung von Routen aus Permutation
-                route.addCheckpoint(new Neighbor(depot,
-                        depot.getNeighborById(permutation[steps]).getDistance()));
+        int routeCounter = 1;
+        int start = findStartInPerm(permutation, 1);// Start bei Depot
+        int nextEntry = ((start + 1) % permutation.length); // Wenn Depot letzter Punkt, step = perm[0] wegen Modulo
+        System.out.println("Route: "+routeCounter);
+        Node current = Cvrp_ls.getNodeById(nodes, permutation[start]);  //ist das Depot am Anfang
+        while (nextEntry != start) {
+            
+            Neighbor next = current.getNeighborById(permutation[nextEntry]);
+            if (route.getCapacity() >= next.getNode().getDemand()) {
+                route.addCheckpoint(next);
+                route.addCost(next.getDistance());
+                System.out.println("\n\tSchritt zu: " + next.getNode().getId());
+                current = next.getNode();
+            } else {
+                route.addCheckpoint(current.getNeighborById(1));//zurück zum Depot
+                route.addCost(current.getNeighborById(1).getDistance());
+                System.out.println("\n\tSchritt zu: " + next.getNode().getId());
+                current = current.getNeighborById(1).getNode();
+                System.out.println("\n\tSchritt zu: " + current.getId());
+                routes.add(route);
+                routeCounter++;
+                route = new Route(capacity);
+                System.out.println("Route: "+routeCounter);
+                continue;
             }
+            nextEntry = (nextEntry + 1) % permutation.length;
         }
         return routes;
     }
 
+    private int findStartInPerm(int[] permutation, int id) {
+        int i = 0;
+        while (i < permutation.length) {
+            if (permutation[i] != id) {
+                i++;
+                continue;
+            }else{
+                break;
+            }
+        }
+        return i;
+    }
+
     /**
-     * Die Reihenfolge nach ID wird berechnet:
-     * [1]->[22]
-     * [22]->[31]...
-     * Wird zwischen 22 und 31 das Depot angefahren, wird dies im Parameter
-     * {@link #totalCost} berücksichtigt
-     * mit der Methode {@link #calcRealCosts}
+     * Die Reihenfolge nach ID wird berechnet: [1]->[22] [22]->[31]... Wird zwischen
+     * 22 und 31 das Depot angefahren, wird dies im Parameter {@link #totalCost}
+     * berücksichtigt mit der Methode {@link #calcRealCosts}
      * 
      * @param routes Belieferungsfahrten
      * @return Permutationsmatrix ohne Nachladeberücksichtigung
      */
-    private int[]buildPerm(ArrayList<Route> routes) {
+    private int[] buildPerm(ArrayList<Route> routes) {
         int[] permutation = new int[this.dimension];
         int lastRoutePos = 0;
         for (Route route : routes) {
             ArrayList<Neighbor> checkpoints = route.getCheckpoints();
             for (int i = 0; i < checkpoints.size(); i++) {
-                //wenn 3 Checkpoints schon drin, bei [3] weitermachen
-                permutation[i+lastRoutePos] = checkpoints.get(i).getNode().getId();    
+                // wenn 3 Checkpoints schon drin, bei [3] weitermachen
+                permutation[i + lastRoutePos] = checkpoints.get(i).getNode().getId();
             }
-            lastRoutePos+=checkpoints.size();
+            lastRoutePos += checkpoints.size();
         }
         return permutation;
     }
@@ -131,63 +154,10 @@ public class TSPInstance {
         return result.toString();
     }
 
-    public void repairCrossover(TSPInstance parent1, TSPInstance parent2, int[] newPerm) {
-        int progress = 0; // Zählzeiger, wird bei Duplikat auf 0 zurückgesetzt
-        while (progress < newPerm.length) {
-            // Permutation Suchobjekt Ab hier
-            if (valueFoundTwice(newPerm, newPerm[progress], progress + 1)) {
-                int positionInParent = getIndexOfId(parent2.getPermutation(), newPerm[progress]); // Position im 2.
-                                                                                                     // Elternteil
-                newPerm[progress] = parent2.getPermutation()[positionInParent]; // dessen Wert übernehmen
-                progress = 0; // zurück zum Anfang, neu suchen auf Dopplungen
-                continue; // Inkrementierung überspringen
-            }
-            progress++;
-        }
-        this.totalCost = calcTotalCosts(this.routes);
-    }
-
-    /**
-     * Es wird geschaut, ob das gegebene Objekt in der Permutation nach dem
-     * Startpunkt nochmal auftaucht
-     * 
-     * @param permutation
-     * @param id          Suchobjekt
-     * @param startpoint  Startpunkt
-     * @return Ja oder Nein
-     */
-    private static boolean valueFoundTwice(int[] permutation, int id, int startpoint) {
-        for (int i = startpoint; i < permutation.length; i++) {
-            if (permutation[i] == id) {
-                return true; // Methodenabbruch mit TRUE da Eintrag gefunden wurde
-            }
-        }
-        return false; // in Schleife nichts gefunden, daher FALSE
-    }
-
-    /**
-     * Indexbestimmung des Objekts in Struktur
-     * 
-     * @param permutation Struktur(Elternstruktur zum Reparieren)
-     * @param id          Suchobjekt
-     * @return
-     */
-    private static int getIndexOfId(int[] permutation, int id) {
-        int index = 0;
-        while (index < permutation.length) {
-            if (permutation[index] == id) {
-                break;
-            }
-            index++;
-        }
-        return index;
-    }
-
     public String toString() {
         StringBuilder instanceDetails = new StringBuilder();
-        instanceDetails.append("\n" + "Eltern: " + parent1 + " + " + parent2 + "\t")
-                        .append("\tKosten: " + totalCost)
-                        .append("\tAnzahl Routen: " + routes.size());
+        instanceDetails.append("\n" + "Eltern: " + parent1 + " + " + parent2 + "\t").append("\tKosten: " + totalCost)
+                .append("\tAnzahl Routen: " + routes.size());
 
         return instanceDetails.toString();
     }

@@ -1,6 +1,7 @@
 package uebung_1;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GeneticSearch {
     public static final int parentsDefault = 10;
@@ -8,8 +9,7 @@ public class GeneticSearch {
 
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
-     * zufällig gewürfelt werden
-     * (auch bei gleichen Eltern)
+     * zufällig gewürfelt werden (auch bei gleichen Eltern)
      * 
      * @param parent1 Elternteil 1
      * @param parent2 Elternteil 2
@@ -17,7 +17,7 @@ public class GeneticSearch {
      */
     public static TSPInstance combineGenetics(ArrayList<Node> nodes, TSPInstance parent1, TSPInstance parent2) {
         int[] newPerm = new int[parent1.getDimension()];
-        int left = (int) (Math.random() * newPerm.length * sizeOfSides);
+        int left = (int) (newPerm.length * sizeOfSides);
         int right = (int) (newPerm.length - left);
 
         for (int i = 0; i < left; i++) {
@@ -29,12 +29,9 @@ public class GeneticSearch {
         for (int i = right; i < newPerm.length; i++) {
             newPerm[i] = parent1.getPermutation()[i]; // Rechts von P1 verwenden
         }
-        TSPInstance child = new TSPInstance(nodes,
-                newPerm,
-                parent1.getCapacity(),
-                parent1.getId(),
+        int[] repairedPerm = GeneticSearch.repairCrossover(parent1, parent2, newPerm, left, right);
+        TSPInstance child = new TSPInstance(nodes, repairedPerm, parent1.getCapacity(), parent1.getId(),
                 parent2.getId());
-        child.repairCrossover(parent1, parent2, newPerm);
         return child;
     }
 
@@ -52,20 +49,20 @@ public class GeneticSearch {
         int route_Counter = 1;
         Neighbor next;
         int parentId = 1;
-        Route currentRoute = new Route(capacity);
-        Node current = Cvrp_ls.getNodeById(nodes, 1); // Startpunkt bei Depot
-        // System.out.println("Depot\naktuelle Route Nr. 1");
-
+        System.out.println("Depot\naktuelle Route Nr. 1");
         // Loop für Instanzenerzeugung
         while (parentId <= amount) {
+            Route currentRoute = new Route(capacity);
+            Node current = Cvrp_ls.getNodeById(nodes, 1); // Startpunkt bei Depot
             ArrayList<Route> routes = new ArrayList<Route>(); // Routen für jede Instanz
+            System.out.println("\n********** TSP-Instanz: " + parentId + "**********");
             // Loop für Routen der konkreten Instanz
             while (current.getClosestDemandingNeighbor() != null) {
                 StringBuilder output_final = new StringBuilder();
 
                 /**
-                 * zum Start der Route einen zufälligen neuen Startpunkt erzeugen
-                 * dadurch sollten die Elterninstanzen recht gut (im Sinne von Nicht-Optimal)
+                 * zum Start der Route einen zufälligen neuen Startpunkt erzeugen dadurch
+                 * sollten die Elterninstanzen recht gut (im Sinne von Nicht-Optimal)
                  * durchmischt sein
                  */
                 if (currentRoute.getCapacity() == capacity) {
@@ -73,7 +70,7 @@ public class GeneticSearch {
                     // daraus wird ein zufälliger Nachbar gewählt
                     int randomNeighbor = (int) (Math.random() * getUnclearedNeighbors(current).size());
                     next = current.getNeighbors().get(randomNeighbor); // hier mit Index, da Listengröße gearbeitet wird
-                    if (next.getNode().getDemand() == 0) {
+                    if (next.getNode().isCleared()) {
                         next = getUnclearedNeighbors(current).get(0);
                     }
                 }
@@ -85,8 +82,8 @@ public class GeneticSearch {
                 int nodeDemand = next.getNode().getDemand();
 
                 /*
-                 * Route wird beendet, Wege zurück zu Depot und neue Route starten
-                 * wichtig, damit jeder Knoten echt nur 1 Mal angesteuert wird
+                 * Route wird beendet, Wege zurück zu Depot und neue Route starten wichtig,
+                 * damit jeder Knoten echt nur 1 Mal angesteuert wird
                  */
                 if (currentRoute.getCapacity() < nodeDemand) {
                     // straight zurück zum Depot
@@ -95,8 +92,8 @@ public class GeneticSearch {
                     currentRoute = new Route(capacity); // neue Route erstellen
                     route_Counter++; // Zähler
                     current = nodes.get(0);// Nächste Suche von Depot aus, da neue Route
-                    output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t"
-                                             + "Distanz: " + next.getNode().getNeighborById(1).getDistance());
+                    output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t" + "Distanz: "
+                            + next.getNode().getNeighborById(1).getDistance());
                     output_final.append("\naktuelle Route Nr. " + route_Counter);
                     System.out.println(output_final.toString());
                     continue;
@@ -119,11 +116,11 @@ public class GeneticSearch {
             routes.add(currentRoute);
             parents.add(new TSPInstance(routes, nodes.size(), capacity, parentId));
             parentId++;
+            route_Counter = 1;
             for (int i = 1; i < nodes.size(); i++) {
-                nodes.get(i).setCleared(false); //Node-Belieferung zurücksetzen
+                nodes.get(i).setCleared(false); // Node-Belieferung zurücksetzen
             }
-                
-            
+
         }
         return parents;
     }
@@ -145,8 +142,7 @@ public class GeneticSearch {
         return demandingNeighbors;
     }
 
-    public static LimitedSizeList<TSPInstance> findGeneticSetWithTime(ArrayList<Node> nodes,
-            int capacity,
+    public static LimitedSizeList<TSPInstance> findGeneticSetWithTime(ArrayList<Node> nodes, int capacity,
             long maxRuntimeMillis) {
         // Elterninstanzen
         ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, parentsDefault);
@@ -154,7 +150,7 @@ public class GeneticSearch {
         for (TSPInstance tspInstance : parents) {
             parentInfo.append("\nElternID: " + tspInstance.getId())
                     .append("\tGesamtdistanz: " + tspInstance.getTotalCost())
-                    .append("\tAnzahl Routen: " + tspInstance.getRoutes().size()+"\n");
+                    .append("\tAnzahl Routen: " + tspInstance.getRoutes().size() + "\n");
         }
         System.out.println(parentInfo.toString());
         // Laufzeitmessung starten
@@ -184,11 +180,69 @@ public class GeneticSearch {
     private static int getFittest(ArrayList<TSPInstance> parents) {
         int lowestCost = -1;
         for (TSPInstance tspInstance : parents) {
-            if (lowestCost == -1
-                    || tspInstance.getTotalCost() < lowestCost) {
+            if (lowestCost == -1 || tspInstance.getTotalCost() < lowestCost) {
                 lowestCost = tspInstance.getTotalCost();
             }
         }
         return lowestCost;
+    }
+
+    public static int[] repairCrossover(TSPInstance parent1, TSPInstance parent2, int[] permutation, int leftBound,
+            int rightBound) {
+        int[] newPerm = Arrays.copyOf(permutation, permutation.length);
+
+        int progress = 0; // Zählzeiger, wird bei Duplikat auf 0 zurückgesetzt
+        // linke Seite reparieren
+        while (progress < newPerm.length - 1) {
+            // Permutation Suchobjekt Ab hier
+            int foundHere = valueFoundTwice(newPerm, newPerm[progress], progress + 1);
+            if (foundHere != -1) {
+                // Position aus Mittelsegment des 1. Elternteils zum Reparieren
+                newPerm[progress] = parent1.getPermutation()[foundHere];
+                progress = 0; // zurück zum Anfang, neu suchen auf Dopplungen
+                continue;
+            }
+            progress++;
+            if (progress == leftBound) {// zu rechter Seite springen
+                progress = rightBound + 1;
+            }
+        }
+        return newPerm;
+    }
+
+    /**
+     * Es wird geschaut, ob das gegebene Objekt in der Permutation nach dem
+     * Startpunkt nochmal auftaucht
+     * 
+     * @param permutation
+     * @param id          Suchobjekt
+     * @param startpoint  Startpunkt
+     * @return Ja oder Nein
+     */
+    private static int valueFoundTwice(int[] permutation, int id, int start) {
+        for (int i = start; i < permutation.length; i++) {
+            if (permutation[i] == id) {
+                return i; // Methodenabbruch mit TRUE da Eintrag gefunden wurde
+            }
+        }
+        return -1; // in Schleife nichts gefunden, daher FALSE
+    }
+
+    /**
+     * Indexbestimmung des Objekts in Struktur
+     * 
+     * @param permutation Struktur(Elternstruktur zum Reparieren)
+     * @param id          Suchobjekt
+     * @return
+     */
+    private static int getIndexOfId(int[] permutation, int id, int startpoint) {
+        int index = startpoint;
+        while (index < permutation.length) {
+            if (permutation[index] == id) {
+                break;
+            }
+            index++;
+        }
+        return index;
     }
 }
