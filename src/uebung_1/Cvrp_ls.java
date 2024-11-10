@@ -113,7 +113,7 @@ public class Cvrp_ls {
 
             System.out.println(output_final.toString());*/
             if (algorithm.equals("taboo")) {       // Auswahl des Algorithmus Tabu
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 100,maxRuntimeMillis);
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 100,maxRuntimeMillis,filename);
 
             /* ______GENETISCHE_SUCHE_BAUSTELLE______
             *else if (algorithm.equals("genetic")) { // Auswahl des Algorithmus genetisch

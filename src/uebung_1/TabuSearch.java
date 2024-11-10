@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class TabuSearch {
 
-    public static ArrayList<Route> find_Tabu_Set(ArrayList<Node> nodes, int capacity, int tabuTenure, long maxRuntimeMillis) {
+    public static ArrayList<Route> find_Tabu_Set(ArrayList<Node> nodes, int capacity, int tabuTenure, long maxRuntimeMillis, String filename) {
         ArrayList<Route> bestRoutes = new ArrayList<>();
         LinkedList<Route> tabuList = new LinkedList<>();
         int routeCounter = 1;
@@ -29,6 +29,9 @@ public class TabuSearch {
 
             // Falls keine Nachbarn mehr mit Bedarf vorhanden sind, abbrechen
             if (next == null) {
+                nodes = read_nodes_from_txt(filename);
+                Integer[][] demands = read_demands_from_txt(filename, dimension);
+                demands = read_demands_from_txt(filename, dimension);
                 current = getNodeById(nodes, 1); // Startpunkt bei Depot
             }
 
