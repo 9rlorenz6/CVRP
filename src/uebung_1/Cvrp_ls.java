@@ -113,7 +113,7 @@ public class Cvrp_ls {
 
             System.out.println(output_final.toString());*/
             if (algorithm.equals("taboo")) {       // Auswahl des Algorithmus Tabu
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 1000000,maxRuntimeMillis);
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 100,maxRuntimeMillis);
 
             /* ______GENETISCHE_SUCHE_BAUSTELLE______
             *else if (algorithm.equals("genetic")) { // Auswahl des Algorithmus genetisch
@@ -131,7 +131,7 @@ public class Cvrp_ls {
             */
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-                System.out.println("Erwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
+                System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
             }
             // for (Route route : routes) {
             // System.out.println(route);
@@ -313,6 +313,7 @@ public class Cvrp_ls {
             else {
                 current = next.getNode();
             }
+            output_final.append("\n\n" + "Gesamtkosten: " + currentRoute.getCost());
             System.out.println(output_final.toString());
         }
         // letzte Route mit Restkapazität darf nicht fehlen

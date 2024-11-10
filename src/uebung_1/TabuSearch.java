@@ -29,7 +29,7 @@ public class TabuSearch {
 
             // Falls keine Nachbarn mehr mit Bedarf vorhanden sind, abbrechen
             if (next == null) {
-                break;
+                current = getNodeById(nodes, 1); // Startpunkt bei Depot
             }
 
             int nodeDemand = next.getNode().getDemand();
@@ -67,7 +67,7 @@ public class TabuSearch {
                 current = next.getNode();
                 demandCounter++;
             }
-
+            output_final.append("\n" + " verbleibende Zeit: " + (System.currentTimeMillis() - startTime));
             System.out.println(output_final.toString());
         }
         
