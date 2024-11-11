@@ -43,7 +43,14 @@ public class Node implements Comparator<Node> {
             this.demand -= demand;
         }
     }
-    
+    public boolean hasDemandingNeighbors(){
+        for (Neighbor neighbor : neighbors) {
+            if (!(neighbor.getNode().isCleared())){
+                return true;
+            }
+        }
+        return false;
+    }
     public int getId() {
         return id;
     }

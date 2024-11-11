@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.TabStop;
 
 public class GeneticSearch {
-    public static final int parentsDefault = 10;
+
     public static double sizeOfSides = 0.3; // Linke und Rechte Seite sollen Platz für Mitte lassen
-    private static final double leastFitnessFactor = 1.1; 
 
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
@@ -18,7 +18,8 @@ public class GeneticSearch {
      * @param parent2 Elternteil 2
      * @return einzelnes Kind dieser Kombination
      */
-    public static TSPInstance combineGenetics(ArrayList<Node> nodes, TSPInstance parent1, TSPInstance parent2, int childId) {
+    public static TSPInstance combineGenetics(ArrayList<Node> nodes, TSPInstance parent1, TSPInstance parent2,
+            int childId) {
         int[] newPerm = new int[parent1.getDimension()];
         int left = (int) (newPerm.length * sizeOfSides);
         int right = (int) (newPerm.length - left);
@@ -32,12 +33,16 @@ public class GeneticSearch {
         for (int i = right; i < newPerm.length; i++) {
             newPerm[i] = parent1.getPermutation()[i]; // Rechts von P1 verwenden
         }
+
+        // System.out.println("Kind: " + childId + "\tEltern: " + parent1.getId() + " +
+        // " + parent2.getId());
         int[] repairedPerm = GeneticSearch.repairCrossover(parent1, parent2, newPerm, left, right);
-        if(repairedPerm.length == 0){
-            return null;
-        }
+
         TSPInstance child = new TSPInstance(nodes, repairedPerm, parent1.getCapacity(), parent1.getId(),
                 parent2.getId(), childId);
+        if (child.getRoutes().size() == 1) {
+            System.out.println();
+        }
         return child;
     }
 
@@ -60,29 +65,30 @@ public class GeneticSearch {
         while (parentId <= amount) {
             Route currentRoute = new Route(capacity);
             Node current = Cvrp_ls.getNodeById(nodes, 1); // Startpunkt bei Depot
+            currentRoute.addCheckpoint(new Neighbor(current, 0)); // erste Route startet bei Depot
             ArrayList<Route> routes = new ArrayList<Route>(); // Routen für jede Instanz
             // Loop für Routen der konkreten Instanz
-            while (current.getClosestDemandingNeighbor() != null) {
-                StringBuilder output_final = new StringBuilder();
+            while (current.hasDemandingNeighbors() != false) {
 
                 /**
                  * zum Start der Route einen zufälligen neuen Startpunkt erzeugen dadurch
                  * sollten die Elterninstanzen recht gut (im Sinne von Nicht-Optimal)
                  * durchmischt sein
                  */
-                if (currentRoute.getCapacity() == capacity) {
-                    // Zufallszahl aus Menge der Anzahl noch zu beliefernder Nachbarn
-                    // daraus wird ein zufälliger Nachbar gewählt
-                    int randomNeighbor = (int) (Math.random() * getUnclearedNeighbors(current).size());
-                    next = current.getNeighbors().get(randomNeighbor); // hier mit Index, da Listengröße gearbeitet wird
-                    if (next.getNode().isCleared()) {
-                        next = getUnclearedNeighbors(current).get(0);
-                    }
+                int randomNeighbor = (int) (Math.random() * getUnclearedNeighbors(current).size());
+                // if (currentRoute.getCapacity() == capacity) {
+                // Zufallszahl aus Menge der Anzahl noch zu beliefernder Nachbarn
+                // daraus wird ein zufälliger Nachbar gewählt
+                next = getUnclearedNeighbors(current).get(randomNeighbor); // hier mit Index, da Listengröße gearbeitet
+                                                                           // wird
+                if (next.getNode().isCleared()) {
+                    next = getUnclearedNeighbors(current).get(0);
                 }
+                // }
                 // während der Route den nächstgelegenen Nachbarn mit Bedarf suchen
-                else {
-                    next = current.getClosestDemandingNeighbor();
-                }
+                // else {
+                // next = current.getClosestDemandingNeighbor();
+                // }
                 // Abarbeitung der Bedarfe und Kosten
                 int nodeDemand = next.getNode().getDemand();
 
@@ -93,14 +99,11 @@ public class GeneticSearch {
                 if (currentRoute.getCapacity() < nodeDemand) {
                     // straight zurück zum Depot
                     currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
+                    currentRoute.addCheckpoint(next.getNode().getNeighborById(1));
                     routes.add(currentRoute); // Route abspeichern
                     currentRoute = new Route(capacity); // neue Route erstellen
                     route_Counter++; // Zähler
                     current = nodes.get(0);// Nächste Suche von Depot aus, da neue Route
-                    // output_final.append("\n" + "Rückkehr zu Depot ID: " + current.getId() + "\t" + "Distanz: "
-                    //         + next.getNode().getNeighborById(1).getDistance());
-                    // output_final.append("\naktuelle Route Nr. " + route_Counter);
-                    // System.out.println(output_final.toString());
                     continue;
                 }
                 currentRoute.addCost(next.getDistance());
@@ -108,14 +111,6 @@ public class GeneticSearch {
                 currentRoute.reduceCapacity(nodeDemand);
                 currentRoute.addCheckpoint(next);
 
-                // Verfolgungsausgabe
-                // output_final.append("\tNachbar ID: " + next.getNode().getId() + "\t");
-                // output_final.append("\tDistanz: " + next.getDistance() + "\t" + "Bedarf:" + nodeDemand);
-                // output_final.append("\tverbleibende Kapazität " + currentRoute.getCapacity());
-                // System.out.println(output_final.toString());
-
-                // Route kann noch weiter gehen, da Kapazität noch nicht erschöpft
-                // Belieferungszähler um 1 erhöhen
                 current = next.getNode();
             }
             // letzte Route mit Restkapazität darf nicht fehlen
@@ -151,7 +146,7 @@ public class GeneticSearch {
     public static LimitedSizeList findGeneticSetWithTime(ArrayList<Node> nodes, int capacity,
             long maxRuntimeMillis) {
         // Elterninstanzen
-        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, parentsDefault);
+        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, (nodes.size() / 2));
         StringBuilder parentInfo = new StringBuilder();
         for (TSPInstance tspInstance : parents) {
             parentInfo.append("\nElternID: " + tspInstance.getId())
@@ -159,37 +154,51 @@ public class GeneticSearch {
                     .append("\tAnzahl Routen: " + tspInstance.getRoutes().size());
         }
         int childId = parents.size() + 1;
+        TSPInstance[] top5 = new TSPInstance[5];
         System.out.println(parentInfo.toString());
         // Laufzeitmessung starten
         long startTime = System.currentTimeMillis();
 
         // alle Eltern ein Mal durchtesten (1,2 | 1,3 | 1,4 | 2,3 | 2,4 | 3,4)
         int parentBase = 0;
+        int parentRun = parentBase + 1;
         ArrayList<TSPInstance> nextGeneration = new ArrayList<TSPInstance>();
         LimitedSizeList mostFit = new LimitedSizeList(5);
         while (true) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             long remainingTime = maxRuntimeMillis - elapsedTime;
-            if(remainingTime <= 0){
+            long timeInterval = System.currentTimeMillis() - startTime;
+            if (remainingTime <= 0) { // Zeit abgelaufen
                 break;
             }
-
-            for (int parentRun = parentBase + 1; parentRun < parents.size(); parentRun++) {
-                TSPInstance child = combineGenetics(nodes, parents.get(parentBase), parents.get(parentRun), childId);
-                System.out.println(child.toString());
-                nextGeneration.add(child);
-                if (child.getTotalCost() <= (int) (GeneticSearch.getFittest(parents)*leastFitnessFactor)) {
-                    mostFit.add(child);
+            if (parentRun == parents.size()) { // Ende der Parent-1-Kette
+                parentBase++;
+                parentRun = parentBase + 1;
+                if (parentBase == parents.size() - 1) {
+                    break;
                 }
-                if (parentRun + 1 == parents.size()) {
-                    parents = nextGeneration;
-                    nextGeneration = new ArrayList<TSPInstance>();
-                    childId = parents.size() + 1;
-                }
-                childId++;
-                System.out.println("Kosten von Kind: " + child.getId() + "\t" + child.getTotalCost() + "\n");
             }
-            parentBase++;
+            TSPInstance child = combineGenetics(nodes, parents.get(parentBase), parents.get(parentRun), childId);
+            childId++;
+            nextGeneration.add(child);
+            for (int i = 0; i < top5.length; i++) {
+                if(top5[i] == null){
+                    top5[i] = child;
+                    System.out.println("Platz " + i + "war leer.");
+                    break;
+                }
+                else if (child.getTotalCost() < top5[i].getTotalCost()) {
+                    top5[i] = child;
+                    System.out.println("Kind  " + top5[i].getId() + "ersetzt durch " + childId);
+                    break;
+                }
+            }
+
+            parentRun++;
+        }
+        System.out.println("Erzeugte Kinder: " + (childId - 1 - parents.size()));
+        for (int i = 0; i < top5.length; i++) {
+            mostFit.add(top5[i]);
         }
         return mostFit;
     }
@@ -210,9 +219,9 @@ public class GeneticSearch {
 
         int progress = 0; // Zählzeiger, wird bei Duplikat auf 0 zurückgesetzt
         // linke Seite reparieren
-        while (progress < newPerm.length - 1) {
+        while (progress < newPerm.length) {
             // Permutation Suchobjekt Ab hier
-            int foundHere = valueFoundTwice(newPerm, newPerm[progress], progress + 1);
+            int foundHere = valueFoundTwice(newPerm, newPerm[progress], progress);
             if (foundHere != -1) {
                 // Position aus Mittelsegment des 1. Elternteils zum Reparieren
                 newPerm[progress] = parent1.getPermutation()[foundHere];
@@ -229,20 +238,26 @@ public class GeneticSearch {
 
     /**
      * Es wird geschaut, ob das gegebene Objekt in der Permutation nach dem
-     * Startpunkt nochmal auftaucht
+     * bis zur gegebenen letzten Position vorkommt
      * 
      * @param permutation
      * @param id          Suchobjekt
-     * @param startpoint  Startpunkt
+     * @param startpoint  Endpunkt
      * @return Ja oder Nein
      */
-    private static int valueFoundTwice(int[] permutation, int id, int start) {
-        for (int i = start; i < permutation.length; i++) {
+    private static int valueFoundTwice(int[] permutation, int id, int position) {
+        int i = 0;
+        while (i < permutation.length) {
+            if (i == position) {
+                i++;
+                continue;
+            }
             if (permutation[i] == id) {
                 return i; // Methodenabbruch mit TRUE da Eintrag gefunden wurde
             }
+            i++;
         }
-        return -1; // in Schleife nichts gefunden, daher FALSE
+        return -1; // in Schleife nichts gefunden, daher -1
     }
 
     /**

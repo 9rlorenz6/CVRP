@@ -11,9 +11,6 @@ public class Cvrp_ls {
         String filename;
         String algorithm = "genetic";
         long maxRuntimeMillis = 3; // Tabu | Genetische Suche
-        int amountParents = 0; // genetische Suche
-        int amountChildren = 0; // genetische Suche
-        int amountGenerations = 0; // genetische Suche
 
         if (args.length < 3) {
             System.out.println(
@@ -23,7 +20,7 @@ public class Cvrp_ls {
             // TODO-MAX: Anweisung zur Bedienung der Kommandozeilenangabe //Rückfall zur
             // Ausführung mit Run
         } else {
-            String instance = args[0];
+            String instance = args[0];   
             System.out.println(args[0]);
             algorithm = args[1];
             int seconds = Integer.parseInt(args[2]);
@@ -54,19 +51,8 @@ public class Cvrp_ls {
             // Koordinatenspeicher
             Integer[][] distances = read_distances_from_txt(filename, dimension);
             ArrayList<Node> nodes = read_nodes_from_txt(filename);
-            ArrayList<Node> nodes_safe = nodes;     //Duplikat zum Zurücksetzen
             Integer[][] demands = read_demands_from_txt(filename, dimension);
-            Integer[][] demands_safe = demands;     //Duplikat zum Zurücksetzen
-            // StringBuilder output_diagonal = new StringBuilder();
-            // StringBuilder output_nodes = new StringBuilder();
-            // StringBuilder output_final = new StringBuilder();
-            // Zuordnung von Knoten und Distanzen
-            // Depot ist Knoten[0], das Erste Gewicht ist von Knoten[1] zu Depot
-            /**
-             * row + 1 = untere Knoten-ID (zählt ab 1 nicht ab 0)
-             * col + 1 = obere Knoten-ID
-             * row/col = Distanz von unterer zu oberer Knoten-ID
-             */
+
             for (int row = 0; row < distances.length; row++) {
                 Node current = nodes.get(row); // Knoten der aktuellen Zeile
                 for (int col = 0; col < distances[row].length; col++) {
@@ -79,18 +65,21 @@ public class Cvrp_ls {
 
                 }
             }
-           
             // Tabu-Algorithmus
             if (algorithm.equals("taboo")) { 
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 399, maxRuntimeMillis);
             }
-             // Genetischer Algorithmus 
-             //TODO: Hart-gecodete Parameter rückgängig machen
+            // Genetischer Algorithmus
+            // TODO: Hart-gecodete Parameter rückgängig machen
             else if (algorithm.equals("genetic")) {
-                    LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 3000);
-
-                    System.out.println("bestes Ergebnis:\n" + grandsons.getUpperBest().toString());
-                    System.out.println("Permutation:" + grandsons.getUpperBest().permToString());
+                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 5000);
+                System.out.println("Top 5 Ergebnisse:\n"+ grandsons.toString());
+                System.out.println("\nbestes Ergebnis:" + grandsons.getUpperBest().toString());
+                int routeNr = 1;
+                for (Route route  : grandsons.getUpperBest().getRoutes()) {
+                    System.out.println("Kosten der Reise  " + routeNr + ": " + route.getCost());
+                    routeNr++;
+                } 
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
@@ -99,17 +88,6 @@ public class Cvrp_ls {
             e.printStackTrace();
         }
     }
-
-    private static ArrayList<Node> allDemandsFulfilled(ArrayList<Node> nodes) { //TODO: die eigentlich zum Entfernen von Knoten vorgesehene Methode wird nicht angesprochen
-        for (int i = 1; i < nodes.size(); i++) { // i = 1, Depot ist bei 0 -> Demand = 0
-            if (nodes.get(i).getDemand() == 0) {
-                nodes.remove(i);
-                // Knoten mit 0 rauswerfen, neue Liste mit nur aktiven Knoten
-            }
-        }
-        return nodes;
-    }
-
     private static ArrayList<Node> read_nodes_from_txt(String filename) throws IOException {
         FileReader file = new FileReader(filename);
         BufferedReader reader = new BufferedReader(file);
@@ -244,7 +222,7 @@ public class Cvrp_ls {
         while (current.getClosestDemandingNeighbor() != null) {
             StringBuilder output_final = new StringBuilder();
             // den nächsten Nachbarn suchen
-        
+
             next = current.getClosestDemandingNeighbor();
 
             // Abarbeitung der Bedarfe und Kosten
