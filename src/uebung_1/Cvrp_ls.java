@@ -53,7 +53,6 @@ public class Cvrp_ls {
             ArrayList<Node> nodes = read_nodes_from_txt(filename);
             Integer[][] demands = read_demands_from_txt(filename, dimension);
 
-
             for (int row = 0; row < distances.length; row++) {
                 Node current = nodes.get(row); // Knoten der aktuellen Zeile
                 for (int col = 0; col < distances[row].length; col++) {
@@ -73,9 +72,14 @@ public class Cvrp_ls {
             // Genetischer Algorithmus
             // TODO: Hart-gecodete Parameter rückgängig machen
             else if (algorithm.equals("genetic")) {
-                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 15000);
+                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 5000);
                 System.out.println("Top 5 Ergebnisse:\n"+ grandsons.toString());
                 System.out.println("\nbestes Ergebnis:" + grandsons.getUpperBest().toString());
+                int routeNr = 1;
+                for (Route route  : grandsons.getUpperBest().getRoutes()) {
+                    System.out.println("Kosten der Reise  " + routeNr + ": " + route.getCost());
+                    routeNr++;
+                } 
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
                 System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");

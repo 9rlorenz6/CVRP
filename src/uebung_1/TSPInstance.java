@@ -88,7 +88,7 @@ public class TSPInstance {
         int start = findStartInPerm(permutation, 1);// Start bei Depot
         int nextEntry = ((start + 1) % permutation.length); // Wenn Depot letzter Punkt, step = perm[0] wegen Modulo
         // System.out.println("Route: "+routeCounter);
-        Node current = Cvrp_ls.getNodeById(nodes, permutation[start]); // ist das Depot am Anfang
+        Node current = Cvrp_ls.getNodeById(nodes, 1); // ist das Depot am Anfang
         Neighbor next = current.getNeighborById(permutation[nextEntry]);
 
         while (permutation[nextEntry] != 1) {
@@ -124,13 +124,8 @@ public class TSPInstance {
 
     private int findStartInPerm(int[] permutation, int id) {
         int i = 0;
-        while (i < permutation.length) {
-            if (permutation[i] != id) {
+        while (permutation[i] != id) {
                 i++;
-                continue;
-            } else {
-                break;
-            }
         }
         return i;
     }
@@ -139,20 +134,27 @@ public class TSPInstance {
      * Die Reihenfolge nach ID wird berechnet: [1]->[22] [22]->[31]... Wird zwischen
      * 22 und 31 das Depot angefahren, wird dies im Parameter {@link #totalCost}
      * berücksichtigt mit der Methode {@link #calcRealCosts}
-     * 
+     * <p>Diese Methode wird nur für <b>Eltern-Instanzen</b> verwendet,
+     * weil Kinder ihre Permutation aus den Eltern erzeugen
      * @param routes Belieferungsfahrten
      * @return Permutationsmatrix ohne Nachladeberücksichtigung
      */
     private int[] buildPerm(ArrayList<Route> routes) {
         int[] permutation = new int[this.dimension];
-        int lastRoutePos = 0;
+
+        permutation[0] = routes.get(0).getCheckpoints().get(0).getNode().getId();   //Depot
+        int permPos = 1;
         for (Route route : routes) {
             ArrayList<Neighbor> checkpoints = route.getCheckpoints();
-            for (int i = 0; i < checkpoints.size(); i++) {
-                // wenn 3 Checkpoints schon drin, bei [3] weitermachen
-                permutation[i + lastRoutePos] = checkpoints.get(i).getNode().getId();
+            int i = 0;
+            while(i < route.getCheckpoints().size()) {
+                int next = checkpoints.get(i).getNode().getId();
+                if(next != 1){
+                    permutation[permPos] = next;
+                    permPos++;
+                }
+                i++;
             }
-            lastRoutePos += checkpoints.size();
         }
         return permutation;
     }

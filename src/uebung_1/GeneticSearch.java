@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.TabStop;
 
 public class GeneticSearch {
 
@@ -33,11 +34,15 @@ public class GeneticSearch {
             newPerm[i] = parent1.getPermutation()[i]; // Rechts von P1 verwenden
         }
 
-        // System.out.println("Kind: " + childId + "\tEltern: " + parent1.getId() + " + " + parent2.getId());
+        // System.out.println("Kind: " + childId + "\tEltern: " + parent1.getId() + " +
+        // " + parent2.getId());
         int[] repairedPerm = GeneticSearch.repairCrossover(parent1, parent2, newPerm, left, right);
 
         TSPInstance child = new TSPInstance(nodes, repairedPerm, parent1.getCapacity(), parent1.getId(),
                 parent2.getId(), childId);
+        if (child.getRoutes().size() == 1) {
+            System.out.println();
+        }
         return child;
     }
 
@@ -60,28 +65,30 @@ public class GeneticSearch {
         while (parentId <= amount) {
             Route currentRoute = new Route(capacity);
             Node current = Cvrp_ls.getNodeById(nodes, 1); // Startpunkt bei Depot
+            currentRoute.addCheckpoint(new Neighbor(current, 0)); // erste Route startet bei Depot
             ArrayList<Route> routes = new ArrayList<Route>(); // Routen für jede Instanz
             // Loop für Routen der konkreten Instanz
-            while (current.getClosestDemandingNeighbor() != null) {
+            while (current.hasDemandingNeighbors() != false) {
 
                 /**
                  * zum Start der Route einen zufälligen neuen Startpunkt erzeugen dadurch
                  * sollten die Elterninstanzen recht gut (im Sinne von Nicht-Optimal)
                  * durchmischt sein
                  */
-                if (currentRoute.getCapacity() == capacity) {
-                    // Zufallszahl aus Menge der Anzahl noch zu beliefernder Nachbarn
-                    // daraus wird ein zufälliger Nachbar gewählt
-                    int randomNeighbor = (int) (Math.random() * getUnclearedNeighbors(current).size());
-                    next = current.getNeighbors().get(randomNeighbor); // hier mit Index, da Listengröße gearbeitet wird
-                    if (next.getNode().isCleared()) {
-                        next = getUnclearedNeighbors(current).get(0);
-                    }
+                int randomNeighbor = (int) (Math.random() * getUnclearedNeighbors(current).size());
+                // if (currentRoute.getCapacity() == capacity) {
+                // Zufallszahl aus Menge der Anzahl noch zu beliefernder Nachbarn
+                // daraus wird ein zufälliger Nachbar gewählt
+                next = getUnclearedNeighbors(current).get(randomNeighbor); // hier mit Index, da Listengröße gearbeitet
+                                                                           // wird
+                if (next.getNode().isCleared()) {
+                    next = getUnclearedNeighbors(current).get(0);
                 }
+                // }
                 // während der Route den nächstgelegenen Nachbarn mit Bedarf suchen
-                else {
-                    next = current.getClosestDemandingNeighbor();
-                }
+                // else {
+                // next = current.getClosestDemandingNeighbor();
+                // }
                 // Abarbeitung der Bedarfe und Kosten
                 int nodeDemand = next.getNode().getDemand();
 
@@ -92,6 +99,7 @@ public class GeneticSearch {
                 if (currentRoute.getCapacity() < nodeDemand) {
                     // straight zurück zum Depot
                     currentRoute.addCost(next.getNode().getNeighborById(1).getDistance());
+                    currentRoute.addCheckpoint(next.getNode().getNeighborById(1));
                     routes.add(currentRoute); // Route abspeichern
                     currentRoute = new Route(capacity); // neue Route erstellen
                     route_Counter++; // Zähler
@@ -146,6 +154,7 @@ public class GeneticSearch {
                     .append("\tAnzahl Routen: " + tspInstance.getRoutes().size());
         }
         int childId = parents.size() + 1;
+        TSPInstance[] top5 = new TSPInstance[5];
         System.out.println(parentInfo.toString());
         // Laufzeitmessung starten
         long startTime = System.currentTimeMillis();
@@ -158,27 +167,39 @@ public class GeneticSearch {
         while (true) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             long remainingTime = maxRuntimeMillis - elapsedTime;
+            long timeInterval = System.currentTimeMillis() - startTime;
             if (remainingTime <= 0) { // Zeit abgelaufen
                 break;
+            }
+            if (parentRun == parents.size()) { // Ende der Parent-1-Kette
+                parentBase++;
+                parentRun = parentBase + 1;
+                if (parentBase == parents.size() - 1) {
+                    break;
+                }
             }
             TSPInstance child = combineGenetics(nodes, parents.get(parentBase), parents.get(parentRun), childId);
             childId++;
             nextGeneration.add(child);
-            if ((mostFit.size() < 5)
-                    || ((child.getTotalCost() < mostFit.getLowerBest().getTotalCost()
-                            && mostFit.notContaining(child.getId())))) {
-                mostFit.add(child);
-            }
-            parentRun++;
-            if (parentRun == parents.size()) { // Ende der Parent-1-Kette
-                parentBase++;
-                parentRun = parentBase + 1;
-                if(parentBase == parents.size()-1){
+            for (int i = 0; i < top5.length; i++) {
+                if(top5[i] == null){
+                    top5[i] = child;
+                    System.out.println("Platz " + i + "war leer.");
+                    break;
+                }
+                else if (child.getTotalCost() < top5[i].getTotalCost()) {
+                    top5[i] = child;
+                    System.out.println("Kind  " + top5[i].getId() + "ersetzt durch " + childId);
                     break;
                 }
             }
+
+            parentRun++;
         }
-        System.out.println("Erzeugte Kinder: " + (childId-1));
+        System.out.println("Erzeugte Kinder: " + (childId - 1 - parents.size()));
+        for (int i = 0; i < top5.length; i++) {
+            mostFit.add(top5[i]);
+        }
         return mostFit;
     }
 
@@ -198,9 +219,9 @@ public class GeneticSearch {
 
         int progress = 0; // Zählzeiger, wird bei Duplikat auf 0 zurückgesetzt
         // linke Seite reparieren
-        while (progress < newPerm.length - 1) {
+        while (progress < newPerm.length) {
             // Permutation Suchobjekt Ab hier
-            int foundHere = valueFoundTwice(newPerm, newPerm[progress], progress + 1);
+            int foundHere = valueFoundTwice(newPerm, newPerm[progress], progress);
             if (foundHere != -1) {
                 // Position aus Mittelsegment des 1. Elternteils zum Reparieren
                 newPerm[progress] = parent1.getPermutation()[foundHere];
@@ -217,20 +238,26 @@ public class GeneticSearch {
 
     /**
      * Es wird geschaut, ob das gegebene Objekt in der Permutation nach dem
-     * Startpunkt nochmal auftaucht
+     * bis zur gegebenen letzten Position vorkommt
      * 
      * @param permutation
      * @param id          Suchobjekt
-     * @param startpoint  Startpunkt
+     * @param startpoint  Endpunkt
      * @return Ja oder Nein
      */
-    private static int valueFoundTwice(int[] permutation, int id, int start) {
-        for (int i = start; i < permutation.length; i++) {
+    private static int valueFoundTwice(int[] permutation, int id, int position) {
+        int i = 0;
+        while (i < permutation.length) {
+            if (i == position) {
+                i++;
+                continue;
+            }
             if (permutation[i] == id) {
                 return i; // Methodenabbruch mit TRUE da Eintrag gefunden wurde
             }
+            i++;
         }
-        return -1; // in Schleife nichts gefunden, daher FALSE
+        return -1; // in Schleife nichts gefunden, daher -1
     }
 
     /**

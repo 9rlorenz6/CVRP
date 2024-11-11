@@ -14,7 +14,7 @@ public class LimitedSizeList {
     public void add(TSPInstance instance) {
         // Überprüfen, ob die maximale Größe erreicht wurde
         if (list.size() >= maxSize) {
-            list.removeFirst(); // Entfernt das älteste Element
+            list.remove(getLowerBest()); // Entfernt das älteste Element
         }
         list.addLast(instance); // Fügt das neue Element am Ende hinzu
     }
