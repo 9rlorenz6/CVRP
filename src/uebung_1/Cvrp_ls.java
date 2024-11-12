@@ -68,7 +68,7 @@ public class Cvrp_ls {
             }
             // Tabu-Algorithmus
             if (algorithm.equals("taboo_search")) { 
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, maxRuntimeMillis, tabuTenure);
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, maxRuntimeMillis, 300);
             }
             // Genetischer Algorithmus
             // TODO: Hart-gecodete Parameter rückgängig machen
