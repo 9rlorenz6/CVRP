@@ -6,7 +6,9 @@ import java.util.Arrays;
 public class GeneticSearch {
 
     public static double sizeOfSides = 0.3; // Linke und Rechte Seite sollen Platz für Mitte lassen
-    private static final int nodeDivider = 20;
+    private static final double initialParentSize = 0.1;
+    private static final double topPercentile = 0.9;
+
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
      * zufällig gewürfelt werden (auch bei gleichen Eltern)
@@ -143,7 +145,8 @@ public class GeneticSearch {
     public static LimitedSizeList findGeneticSetWithTime(ArrayList<Node> nodes, int capacity,
             long maxRuntimeMillis) {
         // Elterninstanzen
-        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, (nodes.size() / nodeDivider));
+        int initialParents = (int) (nodes.size() * initialParentSize);
+        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, initialParents);
         StringBuilder parentInfo = new StringBuilder();
         for (TSPInstance tspInstance : parents) {
             parentInfo.append("\nElternID: " + tspInstance.getId())
@@ -152,11 +155,13 @@ public class GeneticSearch {
         }
         int childId = parents.size() + 1;
         TSPInstance[] top5 = new TSPInstance[5];
+        int fitnessBound = (int) (topPercentile * getLeastFit(parents));
         System.out.println(parentInfo.toString());
         // Laufzeitmessung starten
         long startTime = System.currentTimeMillis();
 
-        // alle Eltern ein Mal durchtesten (1,2 | 1,3 | 1,4 | 2,3 | 2,4 | 3,4)
+        // alle nicht verwandten Eltern ein Mal durchtesten (1,2 | 1,3 | 1,4 | 2,3 | 2,4
+        // | 3,4)
         int parentBase = 0;
         int parentRun = parentBase + 1;
         ArrayList<TSPInstance> nextGeneration = new ArrayList<TSPInstance>();
@@ -172,30 +177,33 @@ public class GeneticSearch {
                 parentBase++;
                 parentRun = parentBase + 1;
                 if (parentBase == parents.size() - 1) {
-                   parents = nextGeneration;
-                   nextGeneration = new ArrayList<TSPInstance>();
-                   parentBase = 0;
-                   parentRun = 1;
+                    parents = nextGeneration;
+                    nextGeneration = new ArrayList<TSPInstance>();
+                    parentBase = 0;
+                    parentRun = 1;
                 }
             }
             TSPInstance parent1 = parents.get(parentBase);
             TSPInstance parent2 = parents.get(parentRun);
-            if (parentsAreRelated(parent1, parent2)) {  //Familie nicht miteinander Kreuzen
+            if (parentsAreRelated(parent1, parent2)) { // Familie nicht miteinander Kreuzen
                 parentRun++;
                 continue;
             }
             TSPInstance child = combineGenetics(nodes, parent1, parent2, childId);
             childId++;
+            if (!(child.getTotalCost() < fitnessBound)) {
+                parentRun++;
+                continue;
+            }
             nextGeneration.add(child);
             for (int i = 0; i < top5.length; i++) {
                 if (top5[i] == null) {
                     top5[i] = child;
-                    System.out.println("Platz " + i + "war leer.");
                     break;
                 } else if (child.getTotalCost() < top5[i].getTotalCost()) {
-                    System.out.println("Kind  " + top5[i].getId() + " ersetzt durch " + child.getId());
+                    System.out.println("Top 5-Platzierung: Kind  " + top5[i].getId() + " ersetzt durch " + child.getId());
                     top5[i] = child;
-                    
+
                     break;
                 }
             }
@@ -226,6 +234,16 @@ public class GeneticSearch {
         int lowestCost = -1;
         for (TSPInstance tspInstance : parents) {
             if (lowestCost == -1 || tspInstance.getTotalCost() < lowestCost) {
+                lowestCost = tspInstance.getTotalCost();
+            }
+        }
+        return lowestCost;
+    }
+
+    private static int getLeastFit(ArrayList<TSPInstance> parents) {
+        int lowestCost = -1;
+        for (TSPInstance tspInstance : parents) {
+            if (lowestCost == -1 || tspInstance.getTotalCost() > lowestCost) {
                 lowestCost = tspInstance.getTotalCost();
             }
         }
