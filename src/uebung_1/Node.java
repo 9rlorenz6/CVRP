@@ -124,4 +124,25 @@ public class Node implements Comparator<Node> {
         }
         return closestNeighbor;
     }
+
+    public Neighbor GetRandomDemandingNeighbor() {
+        Neighbor randomNeighbor = null;
+        if (neighbors.size() == 0) {
+            return null;
+        }
+        int id = (int) (Math.random() * neighbors.size());
+        Neighbor nextNeighbor = neighbors.get(id);
+        if (!nextNeighbor.getNode().isCleared()) { // voll versorgte Nachbarn überspringen
+            if (randomNeighbor == null) {
+                //Erster Knoten mit Bedarf wird Vergleichsknoten
+                randomNeighbor = nextNeighbor;
+                
+            }
+        }
+        if ((randomNeighbor == null) && (this.id != 1)){
+            //Sicherheitshalber; Rückkehr zu Depot, keine Nachbarn übrig
+            randomNeighbor = this.getNeighborById(1);
+        }
+        return randomNeighbor;
+    }
 }
