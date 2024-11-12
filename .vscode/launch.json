@@ -9,6 +9,13 @@
             "name": "Cvrp_ls",
             "request": "launch",
             "mainClass": "uebung_1.Cvrp_ls",
+            "projectName": "CVRP_d4243227"
+        },
+        {
+            "type": "java",
+            "name": "Cvrp_ls",
+            "request": "launch",
+            "mainClass": "uebung_1.Cvrp_ls",
             "projectName": "CVRP_f422f1d"
         },
         {

@@ -72,7 +72,7 @@ public class Cvrp_ls {
             // Genetischer Algorithmus
             // TODO: Hart-gecodete Parameter rückgängig machen
             else if (algorithm.equals("genetic")) {
-                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 5000);
+                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, 20000);
                 System.out.println("Top 5 Ergebnisse:\n"+ grandsons.toString());
                 System.out.println("\nbestes Ergebnis:" + grandsons.getUpperBest().toString());
                 int routeNr = 1;

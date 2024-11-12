@@ -3,13 +3,10 @@ package uebung_1;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.swing.table.TableRowSorter;
-import javax.swing.text.TabStop;
-
 public class GeneticSearch {
 
     public static double sizeOfSides = 0.3; // Linke und Rechte Seite sollen Platz für Mitte lassen
-
+    private static final int nodeDivider = 20;
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
      * zufällig gewürfelt werden (auch bei gleichen Eltern)
@@ -146,7 +143,7 @@ public class GeneticSearch {
     public static LimitedSizeList findGeneticSetWithTime(ArrayList<Node> nodes, int capacity,
             long maxRuntimeMillis) {
         // Elterninstanzen
-        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, (nodes.size() / 2));
+        ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, (nodes.size() / nodeDivider));
         StringBuilder parentInfo = new StringBuilder();
         for (TSPInstance tspInstance : parents) {
             parentInfo.append("\nElternID: " + tspInstance.getId())
@@ -175,21 +172,30 @@ public class GeneticSearch {
                 parentBase++;
                 parentRun = parentBase + 1;
                 if (parentBase == parents.size() - 1) {
-                    break;
+                   parents = nextGeneration;
+                   nextGeneration = new ArrayList<TSPInstance>();
+                   parentBase = 0;
+                   parentRun = 1;
                 }
             }
-            TSPInstance child = combineGenetics(nodes, parents.get(parentBase), parents.get(parentRun), childId);
+            TSPInstance parent1 = parents.get(parentBase);
+            TSPInstance parent2 = parents.get(parentRun);
+            if (parentsAreRelated(parent1, parent2)) {  //Familie nicht miteinander Kreuzen
+                parentRun++;
+                continue;
+            }
+            TSPInstance child = combineGenetics(nodes, parent1, parent2, childId);
             childId++;
             nextGeneration.add(child);
             for (int i = 0; i < top5.length; i++) {
-                if(top5[i] == null){
+                if (top5[i] == null) {
                     top5[i] = child;
                     System.out.println("Platz " + i + "war leer.");
                     break;
-                }
-                else if (child.getTotalCost() < top5[i].getTotalCost()) {
+                } else if (child.getTotalCost() < top5[i].getTotalCost()) {
+                    System.out.println("Kind  " + top5[i].getId() + " ersetzt durch " + child.getId());
                     top5[i] = child;
-                    System.out.println("Kind  " + top5[i].getId() + "ersetzt durch " + childId);
+                    
                     break;
                 }
             }
@@ -201,6 +207,19 @@ public class GeneticSearch {
             mostFit.add(top5[i]);
         }
         return mostFit;
+    }
+
+    private static boolean parentsAreRelated(TSPInstance parent1, TSPInstance parent2) {
+        if (parent1.getParent1() == 0) {
+            return false;
+        }
+        if (parent1.getParent1() == parent2.getParent1()
+                || parent1.getParent2() == parent2.getParent2()
+                || parent1.getParent2() == parent2.getParent1()
+                || parent1.getParent1() == parent2.getParent2()) {
+            return true;
+        }
+        return false;
     }
 
     private static int getFittest(ArrayList<TSPInstance> parents) {
