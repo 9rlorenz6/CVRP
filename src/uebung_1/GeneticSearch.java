@@ -5,10 +5,8 @@ import java.util.Arrays;
 
 public class GeneticSearch {
 
-    public static double sizeOfSides = 0.3; // Linke und Rechte Seite sollen Platz für Mitte lassen
     private static final double initialParentSize = 0.1;
-    private static final double topPercentile = 0.9;
-
+    private static final double sizeOfSides = 0.3;
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
      * zufällig gewürfelt werden (auch bei gleichen Eltern)
@@ -142,8 +140,10 @@ public class GeneticSearch {
         return demandingNeighbors;
     }
 
-    public static LimitedSizeList findGeneticSetWithTime(ArrayList<Node> nodes, int capacity,
-            long maxRuntimeMillis) {
+    public static LimitedSizeList findGeneticSetWithTime(ArrayList<Node> nodes,
+                                                        int capacity,
+                                                        long maxRuntimeMillis,
+                                                        double topPercentile) {
         // Elterninstanzen
         int initialParents = (int) (nodes.size() * initialParentSize);
         ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, initialParents);
@@ -183,6 +183,9 @@ public class GeneticSearch {
                     parentRun = 1;
                 }
             }
+            if(parents.size() == 0){
+                break;
+            }
             TSPInstance parent1 = parents.get(parentBase);
             TSPInstance parent2 = parents.get(parentRun);
             if (parentsAreRelated(parent1, parent2)) { // Familie nicht miteinander Kreuzen
@@ -203,11 +206,9 @@ public class GeneticSearch {
                 } else if (child.getTotalCost() < top5[i].getTotalCost()) {
                     System.out.println("Top 5-Platzierung: Kind  " + top5[i].getId() + " ersetzt durch " + child.getId());
                     top5[i] = child;
-
                     break;
                 }
             }
-
             parentRun++;
         }
         System.out.println("Erzeugte Kinder: " + (childId - 1 - parents.size()));

@@ -44,7 +44,6 @@ public class TabuSearch {
                 for (int i = 1; i < nodes.size(); i++) {
                     count++;
                     nodes.get(i).setCleared(false);
-                    
                 }
                 //outputFinal.append("\n" + count);
                 move = 1;

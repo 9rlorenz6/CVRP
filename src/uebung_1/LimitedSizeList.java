@@ -39,7 +39,7 @@ public class LimitedSizeList {
         }
             return lowerBest;
     }
-    public TSPInstance getUpperBest(){
+    public TSPInstance getHighest(){
         TSPInstance upperBest = null;
         for (TSPInstance tspInstance : list) {
             if(upperBest == null || tspInstance.getTotalCost() < upperBest.getTotalCost()){
@@ -52,6 +52,9 @@ public class LimitedSizeList {
     public String toString() {
         StringBuilder string = new StringBuilder();
         for (TSPInstance t : list) {
+            if(t == null){
+                return string.toString();
+            }
             string.append(t.toString());
         }
         return string.toString();
@@ -64,6 +67,15 @@ public class LimitedSizeList {
             }
         }
         return false;
+    }
+
+    public boolean hasEntries() {
+        for (int i = 0; i < this.list.size(); i++) {
+           if(list.get(i) == null){
+            return false;
+           }
+        }
+        return true;
     }
 
 }

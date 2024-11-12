@@ -4,42 +4,41 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.StringBuilder;
 
 public class Cvrp_ls {
 
     public static void main(String[] args) {
-        String filename;
-        String algorithm;
-        int tabuTenure = 1000;
+
+        String algorithm = "";
         long maxRuntimeMillis = 3; // Tabu | Genetische Suche
-
-        if (args.length < 3) {
-            System.out.println(
-                    "Angaben zur Anwendung eines Algorithmus: 'java -cp bin/ uebung_1.Cvrp_ls <instance>' <algorithm> <seconds> [<option>*]");
-            filename = "src/Loggi-n401-k23.vrp";
-            algorithm = "greedy";
-            //Anweisung zur Bedienung der Kommandozeilenangabe
-            // Ausführung mit Run
-        } else {
-            String instance = args[0];   
-            System.out.println(args[0]);
-            algorithm = args[1];
-            int seconds = Integer.parseInt(args[2]);
-            maxRuntimeMillis = seconds * 1000L;
-            if (instance.equals("loggi")) { // Auswahl der Instanz
-                filename = "src/Loggi-n401-k23.vrp";
-            } else {
-                filename = "src/Testdaten_Loggi.vrp";
-            }
-            if (args[3] != null) {
-                tabuTenure = Integer.valueOf(args[3]);
-            }
+        int seconds = 0;
+        int tabuTenure = 0;
+        double topPercentile = 1.0;
+        StringBuilder options = new StringBuilder();
+        options.append("angebotene Algorithmen: (<Feldname ersetzen> \n")
+                .append("\tInstanzenpfad:\t src/Loggi-n401-k23.vrp\n")
+                .append("\n\tGreedy:\t\t java -cp /bin uebung_1.Cvrp_ls <instance> greedy\n")
+                .append("\tTabu-Suche:\t java -cp /bin uebung_1.Cvrp_ls <instance> taboo_search <Sec> <Tabudauer(Durchläufe)>\n")
+                .append("\tGenetisch:\t java -cp /bin uebung_1.Cvrp_ls <instance> genetic <Sec> <% besser als schlechtester Vater(z.B. 0.99)> \n");
+        if (args.length < 2) {
+            System.out.println(options.toString());
+            return;
         }
-
-        String line = "";
-        int dimension = 0;
-        int capacity = 0;
         try {
+            String filename = "";
+            filename = args[0];
+            algorithm = args[1];
+            if (!(algorithm.equals("greedy"))) {
+                seconds = Integer.parseInt(args[2]);
+            }
+
+            System.out.println(args[0] + " wird bearbeitet mit " + algorithm + ".\nZeitlimit: " + seconds + " Sekunden.");
+
+            String line = "";
+            int dimension = 0;
+            int capacity = 0;
+
             FileReader file = new FileReader(filename);
             BufferedReader reader = new BufferedReader(file);
             while ((line = reader.readLine()) != null) {
@@ -69,33 +68,43 @@ public class Cvrp_ls {
                 }
             }
             // Tabu-Algorithmus
-            if (algorithm.equals("taboo_search")) { 
+            if (algorithm.equals("taboo_search")) {
+                seconds = Integer.parseInt(args[2]);
+                maxRuntimeMillis = seconds * 1000L;
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, maxRuntimeMillis, tabuTenure);
             }
             // Genetischer Algorithmus
             // TODO: Hart-gecodete Parameter rückgängig machen
             else if (algorithm.equals("genetic")) {
-                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, maxRuntimeMillis);
-                if(grandsons.size() != 0){
-                    System.out.println("Top Ergebnisse:\n"+ grandsons.toString());
-                    System.out.println("\nbestes Ergebnis:" + grandsons.getUpperBest().toString());
-                }else{
-                    System.out.println("Die Fitness-Bound war zu hoch eingestellt. \n Kein Kind entsprach den Erwartungen.");
+                // seconds = Integer.parseInt(args[2]);
+                maxRuntimeMillis = seconds * 1000L;
+                LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes,
+                        capacity,
+                        maxRuntimeMillis,
+                        topPercentile);
+                if (grandsons.hasEntries()) {
+                    int routeNr = 1;
+                    System.out.println("Top Ergebnisse:\n" + grandsons.toString());
+                    System.out.println("\nbestes Ergebnis:" + grandsons.getHighest().toString());
+                    for (Route route : grandsons.getHighest().getRoutes()) {
+                        System.out.println("Kosten der Reise  " + routeNr + ": " + route.getCost());
+                        routeNr++;
+                    }
+                } else {
+                    System.out.println(
+                            "Die Fitness-Bound war zu hoch eingestellt. \n Kein Kind entsprach den Erwartungen.");
                 }
-                
-                int routeNr = 1;
-                for (Route route  : grandsons.getUpperBest().getRoutes()) {
-                    System.out.println("Kosten der Reise  " + routeNr + ": " + route.getCost());
-                    routeNr++;
-                } 
+
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-                System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\ttaboo_search 3\n\t genetic 3");
             }
-        } catch (IOException e) {
+            System.out.println("\n" + algorithm + "-Algorithmus " + "beendet.");
+            System.out.println(options.toString());
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     private static ArrayList<Node> read_nodes_from_txt(String filename) throws IOException {
         FileReader file = new FileReader(filename);
         BufferedReader reader = new BufferedReader(file);
