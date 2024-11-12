@@ -64,7 +64,6 @@ public class Cvrp_ls {
                     current.setDemand(demands[row][1]);
                     current.addNeighbor(new Neighbor(nodes.get(col), // Knoten-ID des Nachbarn
                             distances[row][col])); // Distanz zu ihm
-
                 }
             }
             // Tabu-Algorithmus
@@ -75,8 +74,13 @@ public class Cvrp_ls {
             // TODO: Hart-gecodete Parameter rückgängig machen
             else if (algorithm.equals("genetic")) {
                 LimitedSizeList grandsons = GeneticSearch.findGeneticSetWithTime(nodes, capacity, maxRuntimeMillis);
-                System.out.println("Top 5 Ergebnisse:\n"+ grandsons.toString());
-                System.out.println("\nbestes Ergebnis:" + grandsons.getUpperBest().toString());
+                if(grandsons.size() != 0){
+                    System.out.println("Top Ergebnisse:\n"+ grandsons.toString());
+                    System.out.println("\nbestes Ergebnis:" + grandsons.getUpperBest().toString());
+                }else{
+                    System.out.println("Die Fitness-Bound war zu hoch eingestellt. \n Kein Kind entsprach den Erwartungen.");
+                }
+                
                 int routeNr = 1;
                 for (Route route  : grandsons.getUpperBest().getRoutes()) {
                     System.out.println("Kosten der Reise  " + routeNr + ": " + route.getCost());

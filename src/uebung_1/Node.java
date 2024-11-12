@@ -1,9 +1,8 @@
 package uebung_1;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
-public class Node implements Comparator<Node> {
+public class Node {
     private ArrayList<Neighbor> neighbors = new ArrayList<Neighbor>();
     private int id;
     private int demand = 0;
@@ -58,15 +57,6 @@ public class Node implements Comparator<Node> {
     public void setId(int id) {
         this.id = id;
     }
-
-
-
-    @Override
-    public int compare(Node node1, Node node2) {
-        return 0;
-    }
-
-  
 
     public ArrayList<Neighbor> getNeighbors() {
         return neighbors;
