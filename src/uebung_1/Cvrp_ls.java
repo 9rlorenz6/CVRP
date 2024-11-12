@@ -17,7 +17,18 @@ public class Cvrp_ls {
         double topPercentile = 1.0;
         StringBuilder options = new StringBuilder();
         options.append("angebotene Algorithmen: (<Feldname ersetzen> \n")
-                .append("\tInstanzenpfad:\t src/Loggi-n401-k23.vrp\n")
+                .append("\tInstanz 1:\t src/Loggi-n401-k23.vrp\n")
+                .append("\tInstanz 2:\t src/Loggi-n501-k24.vrp\n")
+                .append("\tInstanz 3:\t src/Loggi-n601-k19.vrp\n")
+                .append("\tInstanz 4:\t src/Loggi-n601-k42.vrp\n")
+                .append("\tInstanz 5:\t src/Loggi-n901-k42.vrp\n")
+                .append("\tInstanz 6:\t src/Loggi-n1001-k31.vrp\n")
+                .append("\tInstanz 7:\t src/ORTEC-n242-k12.vrp\n")
+                .append("\tInstanz 8:\t src/ORTEC-n323-k21.vrp\n")
+                .append("\tInstanz 9:\t src/ORTEC-n405-k18.vrp\n")
+                .append("\tInstanz 10:\t src/ORTEC-n455-k41.vrp\n")
+                .append("\tInstanz 11:\t src/ORTEC-n510-k23.vrp\n")
+                .append("\tInstanz 12:\t src/ORTEC-n701-k64.vrp\n")
                 .append("\n\tGreedy:\t\t java -cp /bin uebung_1.Cvrp_ls <instance> greedy\n")
                 .append("\tTabu-Suche:\t java -cp /bin uebung_1.Cvrp_ls <instance> taboo_search <Sec> <Tabudauer(Durchläufe)>\n")
                 .append("\tGenetisch:\t java -cp /bin uebung_1.Cvrp_ls <instance> genetic <Sec> <% besser als schlechtester Vater(z.B. 0.99)> \n");

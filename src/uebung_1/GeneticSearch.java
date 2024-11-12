@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class GeneticSearch {
 
-    private static final double initialParentSize = 0.1;
+    private static final double initialParentSize = 0.05;
     private static final double sizeOfSides = 0.3;
     /**
      * Kann für mehrere Kinder genutzt werden, da Austauschbereiche jedes mal
@@ -147,11 +147,14 @@ public class GeneticSearch {
         // Elterninstanzen
         int initialParents = (int) (nodes.size() * initialParentSize);
         ArrayList<TSPInstance> parents = findStartInstances(nodes, capacity, initialParents);
+        TSPInstance worstParent = null;
         StringBuilder parentInfo = new StringBuilder();
         for (TSPInstance tspInstance : parents) {
-            parentInfo.append("\nElternID: " + tspInstance.getId())
-                    .append("\tGesamtdistanz: " + tspInstance.getTotalCost())
-                    .append("\tAnzahl Routen: " + tspInstance.getRoutes().size());
+            if(tspInstance.getId() % 5 == 0){
+                parentInfo.append("\nElternID: " + tspInstance.getId())
+                .append("\tGesamtdistanz: " + tspInstance.getTotalCost())
+                .append("\tAnzahl Routen: " + tspInstance.getRoutes().size());
+            }
         }
         int childId = parents.size() + 1;
         TSPInstance[] top5 = new TSPInstance[5];
@@ -179,6 +182,8 @@ public class GeneticSearch {
                 if (parentBase == parents.size() - 1) {
                     parents = nextGeneration;
                     nextGeneration = new ArrayList<TSPInstance>();
+                    fitnessBound = getLeastFit(parents);
+                    System.out.println("neue Generation!\n");
                     parentBase = 0;
                     parentRun = 1;
                 }
