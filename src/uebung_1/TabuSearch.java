@@ -34,13 +34,19 @@ public class TabuSearch {
                         demandCounter--;
                     }
                 }
-            } 
+            } else {
+                next = current.GetRandomDemandingNeighbor();
+            }
             if (next == null) {
                 totalCost += currentRoute.getCost();
                 current = getNodeById(nodes, 1);
+                int count=0;
                 for (int i = 1; i < nodes.size(); i++) {
+                    count++;
                     nodes.get(i).setCleared(false);
+                    
                 }
+                //outputFinal.append("\n" + count);
                 move = 1;
                 next = current.getClosestDemandingNeighbor();
                 tryCounter++;
