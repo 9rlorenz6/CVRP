@@ -24,13 +24,11 @@ public class TabuSearch {
             StringBuilder output_final = new StringBuilder();
             Neighbor next = current.getClosestDemandingNeighbor();
             // Falls keine Nachbarn mehr mit Bedarf vorhanden sind, neu starten
-            if (Math.random() < 0.1) {  // 10% Wahrscheinlichkeit
+            if (Math.random() < 0.5) {  // 50% Wahrscheinlichkeit
                 id = (int)(Math.random() * nodes.size());
                 System.out.println(id);
                 next = current.getNeighborById(id);
-            } else {
-                next = current.getClosestDemandingNeighbor();
-            }
+
             if (next == null) {
                 totalCost = totalCost + currentRoute.getCost();
                 current = getNodeById(nodes, 1); // Startpunkt bei Depot      

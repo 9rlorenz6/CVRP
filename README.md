@@ -1,17 +1,11 @@
-## Getting Started
-
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
-
+## Bedienanweisung
+Das Programm erwartet die Angabe der Instanz, des Algorithmus, der Zeit und einer Option in dem Format: <instance> <algorithm> <seconds> [<option>*]
+z.B.:  "loggi" "taboo_search" 3 ODER "loggi" "genetic" 3
+Alle anderen Eingaben führen zur Durchführung des Greedy-Algorithmus mit dem Stammdatenset "loggi".
 ## Folder Structure
-
-The workspace contains two folders by default, where:
-
 - `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
 
 Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
 
 ## Dependency Management
 

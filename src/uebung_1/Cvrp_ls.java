@@ -66,7 +66,7 @@ public class Cvrp_ls {
                 }
             }
             // Tabu-Algorithmus
-            if (algorithm.equals("taboo")) { 
+            if (algorithm.equals("taboo_search")) { 
                 ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 399, maxRuntimeMillis);
             }
             // Genetischer Algorithmus
@@ -82,7 +82,7 @@ public class Cvrp_ls {
                 } 
             } else {
                 ArrayList<Route> routes = find_Greedy_Set(nodes, capacity);
-                System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\tTaboo 3\n\t Genetic 3");
+                System.out.println("\n\nErwartete Eingaben für Algorithmensuche\n\ttaboo_search 3\n\t genetic 3");
             }
         } catch (IOException e) {
             e.printStackTrace();
