@@ -6,7 +6,7 @@ public class TabuSearch {
     private static final int MAX_ITERATIONS_WITHOUT_IMPROVEMENT = 100; // Maximale Wiederholungen ohne Verbesserung
     private static final int MIN_COST_THRESHOLD = 1; // Minimalkosten Route
 
-    public static ArrayList<Route> find_Tabu_Set(ArrayList<Node> nodes, int capacity, int tabuTenure, long maxRuntimeMillis) {
+    public static ArrayList<Route> find_Tabu_Set(ArrayList<Node> nodes, int capacity, long maxRuntimeMillis, int tabuTenure) {
         boolean[][] tabuList = new boolean[401][401];
         ArrayList<Route> candidateRoutes = new ArrayList<>();
         ArrayList<Route> routes = new ArrayList<>();
@@ -24,10 +24,8 @@ public class TabuSearch {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < maxRuntimeMillis) {
             StringBuilder outputFinal = new StringBuilder();
-            Neighbor next = current.getClosestDemandingNeighbor();
-
-            // Randomly reset route occasionally
-            if (Math.random() < 0.9) {
+            Neighbor next = current.GetRandomDemandingNeighbor();
+            if (next != null ) {
                 id = (int) (Math.random() * nodes.size());
                 if (current.getNeighborById(id) != null && !current.getNeighborById(id).getNode().isCleared() && !tabuList[move][id]) {
                     next = current.getNeighborById(id);
@@ -36,8 +34,7 @@ public class TabuSearch {
                         demandCounter--;
                     }
                 }
-            }
-
+            } 
             if (next == null) {
                 totalCost += currentRoute.getCost();
                 current = getNodeById(nodes, 1);
@@ -51,7 +48,7 @@ public class TabuSearch {
                 outputFinal.append("\n Durchlauf " +  tryCounter + "\tAnzahl Runden:" + routeCounter + "\t Gesamtkosten: " + totalCost);
                 routeCounter = 0;
                 totalCost = 0;
-            }
+            }    
 
             int nodeDemand = next.getNode().getDemand();
             currentRoute.addCost(next.getDistance());
@@ -92,7 +89,7 @@ public class TabuSearch {
         for (int i = 0; i < 401; i++) {
             for (int j = 0; j < 401; j++) {
                 if (tabuList[i][j] == true) {
-                    System.out.println("Tabu-Bewegung Nr." + i + " auf Nachbar " + j);
+                    //System.out.println("Tabu-Bewegung Nr." + i + " auf Nachbar " + j);
                 }
             }
         }

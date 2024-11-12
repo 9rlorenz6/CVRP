@@ -10,6 +10,7 @@ public class Cvrp_ls {
     public static void main(String[] args) {
         String filename;
         String algorithm;
+        int tabuTenure;
         long maxRuntimeMillis = 3; // Tabu | Genetische Suche
 
         if (args.length < 3) {
@@ -30,6 +31,7 @@ public class Cvrp_ls {
             } else {
                 filename = "src/Testdaten_Loggi.vrp";
             }
+            tabuTenure = Integer.valueOf(args[3]);
         }
 
         String line = "";
@@ -67,7 +69,7 @@ public class Cvrp_ls {
             }
             // Tabu-Algorithmus
             if (algorithm.equals("taboo_search")) { 
-                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, 399, maxRuntimeMillis);
+                ArrayList<Route> routes = TabuSearch.find_Tabu_Set(nodes, capacity, maxRuntimeMillis, tabuTenure);
             }
             // Genetischer Algorithmus
             // TODO: Hart-gecodete Parameter rückgängig machen
