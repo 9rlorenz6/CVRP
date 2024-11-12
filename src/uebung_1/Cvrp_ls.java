@@ -9,7 +9,7 @@ public class Cvrp_ls {
 
     public static void main(String[] args) {
         String filename;
-        String algorithm = "genetic";
+        String algorithm;
         long maxRuntimeMillis = 3; // Tabu | Genetische Suche
 
         if (args.length < 3) {
