@@ -31,8 +31,8 @@ public class Cvrp_ls {
             } else {
                 filename = "src/Testdaten_Loggi.vrp";
             }
-            if (args[3] != null) {
-                tabuTenure = Integer.valueOf(args[3]);
+            if (args.length > 3 ) {
+                tabuTenure = Integer.valueOf(args[3]); //taboo tenure Abfrage
             }
         }
 
