@@ -182,7 +182,7 @@ public class GeneticSearch {
                 if (parentBase == parents.size() - 1) {
                     parents = nextGeneration;
                     nextGeneration = new ArrayList<TSPInstance>();
-                    fitnessBound = getLeastFit(parents);
+                    fitnessBound = (int) (topPercentile*getLeastFit(parents));
                     System.out.println("neue Generation!\n");
                     parentBase = 0;
                     parentRun = 1;
